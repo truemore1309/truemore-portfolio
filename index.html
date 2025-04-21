@@ -19,7 +19,7 @@
     .about-section p { font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.8; }
     .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; width: 100vw; }
     .grid-item { aspect-ratio: 16 / 9; overflow: hidden; }
-    .grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease, box-shadow 0.3s ease; object-position: center center; }
     .grid-item img:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(255,255,255,0.15); }
     .grid-item.hidden { display: none; }
     .more-container { margin: 20px 0; }
@@ -47,16 +47,15 @@
     <p>Hi it's Tru Mo (TrueMore), a CG Generalist. Currently work at MOONSHINE STUDIO & MOONSHINE XR STUDIO as a Technical Artist. I am 做動畫的人。</p>
   </section>
   <section class="portfolio-grid" id="portfolio-grid">
-    <!-- First 8 Projects -->
+    <div class="grid-item"><a href="https://www.facebook.com/watch/?v=1039687634047745" target="_blank"><img style="object-position: top center;" src="https://i.imgur.com/Epiqjg5.jpeg" alt="Project 2"></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=OuzoLiM-cBU" target="_blank"><img src="https://i.imgur.com/Ofu77yl.jpeg" alt="Project 1"></a></div>
-    <div class="grid-item" style="object-position: center top;"><a href="https://www.facebook.com/watch/?v=1039687634047745" target="_blank"><img src="https://i.imgur.com/Epiqjg5.jpeg" alt="Project 2"></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=ZaodEebzfrA" target="_blank"><img src="https://i.imgur.com/P8bvaEy.jpeg" alt="Project 3"></a></div>
     <div class="grid-item"><a href="https://www.wepeople.club/tsai_ming_liang-ballantines-40y" target="_blank"><img src="https://i.imgur.com/wjRVFEM.jpeg" alt="Project 4"></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=8zeXS7s7jok" target="_blank"><img src="https://i.imgur.com/zoiwWxv.jpeg" alt="Project 5"></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=WkuzC_axw-Q" target="_blank"><img src="https://i.imgur.com/iL5IvXs.jpeg" alt="Project 6"></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=zPu48_H1jc0" target="_blank"><img src="https://i.imgur.com/uFiG0jo.jpeg" alt="Project 7"></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=H1jLJC9iT1Q" target="_blank"><img src="https://i.imgur.com/KidEcxY.jpeg" alt="Project 8"></a></div>
-    <!-- Hidden Projects 9-20 -->
+    <!-- Hidden items remain unchanged -->
     <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=re7LJsYNTOw" target="_blank"><img src="https://i.imgur.com/5VhaPBo.jpeg" alt="Project 9"></a></div>
     <div class="grid-item hidden"><a href="https://ghsa.org.tw/gha/festival/film/1112" target="_blank"><img src="https://i.imgur.com/4AO50Ow.jpeg" alt="Project 10"></a></div>
     <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=FVLunYDHXU0" target="_blank"><img src="https://i.imgur.com/QDUddTA.jpeg" alt="Project 11"></a></div>
@@ -70,11 +69,9 @@
     <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=b3S2XUynKvk&t=13796s" target="_blank"><img src="https://i.imgur.com/k9QihqK.jpeg" alt="Project 19"></a></div>
     <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=qPTjbi74MDM"target="_blank"><img src="https://i.imgur.com/n0TxfhY.jpeg" alt="Project 20"></a></div>
   </section>
-
   <div class="more-container">
     <button id="show-more">MORE ˅</button>
   </div>
-
   <section class="video-section">
     <h2 style="text-align: center; margin-bottom: 2rem;">ANIMATION DIRECTOR</h2>
     <div class="video-wrapper">
@@ -90,7 +87,6 @@
       <iframe width="560" height="315" src="https://www.youtube.com/embed/2HeEQuFSomc?si=Lo17jw8FD-sZYvZ_" frameborder="0" allowfullscreen></iframe>
     </div>
   </section>
-
   <script>
     const blurred = document.getElementById('blurred');
     document.addEventListener('mousemove', e => {
@@ -104,3 +100,4 @@
   </script>
 </body>
 </html>
+
