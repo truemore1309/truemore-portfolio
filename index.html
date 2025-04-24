@@ -9,28 +9,29 @@
     body, html { width: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; background-color: #000; color: #fff; }
     .hero { position: relative; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
     .background-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; animation: slideInDown 0.25s ease-in forwards; transform: translateY(-20px); }
-    .clear-bg, .blurred-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }\n    .blurred-bg { filter: brightness(0.5) blur(2px); transform: scale(1.05); mask-image: radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 300px); -webkit-mask-image: radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 300px); transition: mask-image 0.3s ease, -webkit-mask-image 0.3s ease; }
+    .clear-bg, .blurred-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .blurred-bg { filter: brightness(0.5) blur(2px); transform: scale(1.05); mask-image: radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 300px); -webkit-mask-image: radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 300px); transition: mask-image 0.3s ease, -webkit-mask-image 0.3s ease; }
     .hero-content { position: relative; z-index: 2; opacity: 0; animation: fadeIn 2s ease-out forwards; animation-delay: 0.5s; }
     .hero h1 { font-size: 4rem; font-weight: 600; white-space: nowrap; }
     .hero p { margin-top: 1rem; font-size: 1.2rem; font-weight: 300; color: #ccc; }
     .about-section { background-color: #900; color: #fff; padding: 100px 20px; text-align: center; }
     .about-section h2 { font-size: 3rem; margin-bottom: 1rem; }
     .about-section p { font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.8; }
-    .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; width: 100vw; }
-    .grid-item { aspect-ratio: 16 / 9; overflow: hidden; }
-    .grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease, box-shadow 0.3s ease; object-position: center center; }
+    .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); width: 100vw; }
+    .grid-item { aspect-ratio: 16/9; overflow: hidden; }
+    .grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .grid-item img:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(255,255,255,0.15); }
     .grid-item.hidden { display: none; }
     .more-container { margin: 20px 0; }
-    .more-container button { display: block; width: 100%; background-color: #fff; color: #000; border: none; outline: none; padding: 10px 0; font-size: 1rem; cursor: pointer; }
-    .video-section { width: 100%; display: flex; flex-direction: column; gap: 2rem; align-items: center; padding: 4rem 0; background-color: #111; }
-    .video-section h2 { color: #fff; }
-    .video-wrapper { width: 80vw; max-width: 960px; aspect-ratio: 16 / 9; overflow: hidden; }
+    .more-container button { display: block; width: 100%; background-color: #fff; color: #000; border: none; padding: 10px 0; font-size: 1rem; cursor: pointer; }
+    .video-section { background-color: #111; padding: 4rem 0; text-align: center; }
+    .video-section h2 { font-size: 2.5rem; margin-bottom: 2rem; }
+    .video-wrapper { width: 80vw; max-width: 960px; aspect-ratio: 16/9; margin: 0 auto 2rem; }
     .video-wrapper iframe { width: 100%; height: 100%; border: none; }
     .and-more-section { padding: 4rem 20px; background-color: #222; text-align: center; }
-    .and-more-section h2 { font-size: 2.5rem; margin-bottom: 2rem; color: #fff; }
+    .and-more-section h2 { font-size: 2.5rem; margin-bottom: 2rem; }
     .and-more-buttons { display: flex; justify-content: center; gap: 1rem; }
-    .and-more-buttons a button { background-color: #fff; color: #000; border: none; outline: none; padding: 10px 20px; font-size: 1rem; cursor: pointer; border-radius: 4px; }
+    .and-more-buttons a button { background-color: #fff; color: #000; border: none; padding: 10px 20px; font-size: 1rem; cursor: pointer; border-radius: 4px; }
     @keyframes fadeIn { to { opacity: 1; } }
     @keyframes slideInDown { from { transform: translateY(-20px); } to { transform: translateY(0); } }
   </style>
@@ -60,9 +61,19 @@
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=WkuzC_axw-Q" target="_blank"><img src="https://i.imgur.com/iL5IvXs.jpeg" alt="Project 6" /></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=zPu48_H1jc0" target="_blank"><img src="https://i.imgur.com/uFiG0jo.jpeg" alt="Project 7" /></a></div>
     <div class="grid-item"><a href="https://www.youtube.com/watch?v=H1jLJC9iT1Q" target="_blank"><img src="https://i.imgur.com/KidEcxY.jpeg" alt="Project 8" /></a></div>
-    <!-- 隐藏项 -->
+    <!-- 隐藏 9-20 -->
     <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=re7LJsYNTOw" target="_blank"><img src="https://i.imgur.com/5VhaPBo.jpeg" alt="Project 9" /></a></div>
-    <!-- ... Project 10-20 ... -->
+    <div class="grid-item hidden"><a href="https://ghsa.org.tw/gha/festival/film/1112" target="_blank"><img src="https://i.imgur.com/4AO50Ow.jpeg" alt="Project 10" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=FVLunYDHXU0" target="_blank"><img src="https://i.imgur.com/QDUddTA.jpeg" alt="Project 11" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.facebook.com/GogoroTaiwan/videos/456928680232538" target="_blank"><img src="https://i.imgur.com/MbcrMi5.jpeg" alt="Project 12" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=AlKkHZD21BU" target="_blank"><img src="https://i.imgur.com/Kyzf2R2.jpeg" alt="Project 13" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=XX-Ai3QyE5k" target="_blank"><img src="https://i.imgur.com/Rs1jbtV.jpeg" alt="Project 14" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=09o9rxMfojE" target="_blank"><img src="https://i.imgur.com/PuBgQSQ.jpeg` alt="Project 15" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=agIcTZ4F404" target="_blank"><img src="https://i.imgur.com/t3eimw1.jpeg` alt="Project 16" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=80jHEKCAdUo" target="_blank"><img src="https://i.imgur.com/SzxGXF4.jpeg` alt="Project 17" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=P1z_urxDTk8&list=PLmst0aQNinPn5AX5ruT3E5u4glOFh_v8y" target="_blank"><img src="https://i.imgur.com/CDmSfM8.jpeg` alt="Project 18" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=b3S2XUynKvk&t=13796s" target="_blank"><img src="https://i.imgur.com/k9QihqK.jpeg` alt="Project 19" /></a></div>
+    <div class="grid-item hidden"><a href="https://www.youtube.com/watch?v=qPTjbi74MDM" target="_blank"><img src="https://i.imgur.com/n0TxfhY.jpeg` alt="Project 20" /></a></div>
   </section>
   <div class="more-container">
     <button id="show-more">MORE ˅</button>
