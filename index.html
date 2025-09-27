@@ -1,159 +1,223 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Truemore Portfolio</title>
-  <meta name="description" content="Tru Mo (TrueMore) • CG Generalist & Painter • Selected works and directing reels." />
-  <link rel="preconnect" href="https://i.imgur.com" crossorigin>
-  <style>
-    :root{
-      --bg: #000; --bg-2:#111; --bg-3:#222; --fg:#fff; --muted:#cbd5e1; --accent:#fff;
-    }
-    *{box-sizing:border-box}
-    html,body{background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif}
-    a{color:inherit; text-decoration:none}
-    .container{max-width:1200px; margin:0 auto; padding:0 20px}
-
-    /* Hero */
-    .hero{position:relative; min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; overflow:hidden}
-    .background-container{position:absolute; inset:0; pointer-events:none}
-    .clear-bg,.blurred-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center}
-    .blurred-bg{filter:brightness(.55) blur(2px); transform:scale(1.05); mask-image:radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 320px); -webkit-mask-image:radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 320px)}
-    .hero-content{position:relative; z-index:1; will-change:opacity,transform; opacity:0; transform:translateY(8px); animation:fadeIn .8s ease .35s forwards}
-    .hero h1{font-size:clamp(40px,8vw,72px); font-weight:700; letter-spacing:.08em}
-    .hero p{margin-top:10px; font-size:clamp(14px,2.4vw,20px); color:#ddd}
-
-    @keyframes fadeIn{to{opacity:1; transform:none}}
-
-    /* About */
-    .about-section{background:#900; color:#fff; padding:80px 0; text-align:center}
-    .about-section h2{font-size:clamp(28px,4.5vw,48px); margin-bottom:12px}
-    .about-section p{font-size:clamp(14px,2.2vw,18px); max-width:720px; margin:0 auto; line-height:1.8}
-
-    /* Grid */
-    .portfolio-wrap{padding:24px 0 8px}
-    .portfolio-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px}
-    .grid-item{aspect-ratio:16/9; overflow:hidden; background:#0a0a0a; border-radius:10px}
-    .grid-item img{width:100%; height:100%; object-fit:cover; transition:transform .3s ease, box-shadow .3s ease; display:block}
-    .grid-item a:focus-visible img, .grid-item img:hover{transform:scale(1.04); box-shadow:0 10px 28px rgba(255,255,255,.12)}
-    .grid-item.is-hidden{display:none}
-    .more-container{padding:16px 0 32px}
-    .btn{display:block; width:100%; background:#fff; color:#000; border:0; padding:12px 0; font-size:16px; border-radius:8px; cursor:pointer}
-    .btn:focus-visible{outline:2px solid #9ef; outline-offset:2px}
-
-    /* Videos */
-    .video-section{background:var(--bg-2); padding:56px 0; text-align:center}
-    .video-section h2{font-size:clamp(24px,4vw,40px); margin-bottom:24px}
-    .video-wrapper{width:min(92vw,960px); aspect-ratio:16/9; margin:0 auto 24px; border-radius:12px; overflow:hidden; background:#000}
-    .video-wrapper iframe{width:100%; height:100%; border:0}
-
-    /* Links */
-    .and-more-section{padding:56px 0; background:var(--bg-3); text-align:center}
-    .and-more-section h2{font-size:clamp(24px,4vw,40px); margin-bottom:24px}
-    .and-more-buttons{display:flex; flex-wrap:wrap; justify-content:center; gap:12px}
-    .and-more-buttons a button{background:#fff; color:#000; border:0; padding:10px 20px; font-size:16px; border-radius:999px; cursor:pointer}
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      .hero-content{animation:none; opacity:1; transform:none}
-      .blurred-bg{filter:brightness(.55)}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TRUEMORE — Portfolio Preview</title>
+<style>
+:root{--bg:#0b0b0c;--fg:#f2f2f2;--muted:#b4b4b4;--accent:#ffffff;--card:#141416;--border:#232327}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif}
+a{color:inherit;text-decoration:none}
+/* 導覽列目前全站都隱藏（依你的需求） */
+.nav{display:none !important}
+.container{max-width:1100px;margin:0 auto;padding:0}
+/* HERO */
+.hero{min-height:auto;display:grid;grid-template-columns:1fr;gap:0;align-items:end;padding:0;margin:0}
+.hero .image{width:100%;aspect-ratio:16/9;background:var(--card);overflow:hidden;border:none;border-radius:0}
+.hero .image img{width:100%;height:100%;object-fit:cover;display:block}
+.hero h1{font-size:clamp(40px,7vw,84px);line-height:.95;margin:0;letter-spacing:-.02em;text-transform:uppercase}
+.hero p{margin-top:12px;color:var(--muted);font-size:clamp(14px,1.8vw,20px);text-transform:uppercase;font-weight:700}
+/* PROJECTS */
+.project-card{display:block;position:relative;overflow:hidden;opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.project-card.visible{opacity:1;transform:translateY(0)}
+.project-card .thumb{width:100%;aspect-ratio:2/1;overflow:hidden;position:relative}
+.project-card .thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%)}
+.project-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+/* 金馬卡片：圖片置頂裁切，以保留上緣關鍵字 */
+.project-card.top-crop .thumb img{object-position:top}
+.project-card .overlay{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:20px;color:var(--accent);text-align:left}
+.project-card .title{font-weight:900;font-size:clamp(28px,4vw,48px);text-transform:uppercase}
+.project-card .role{font-size:clamp(14px,2vw,24px);text-transform:uppercase;margin-top:4px;font-weight:800}
+/* BORING STUFF */
+.boring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.boring-card{display:block;position:relative;overflow:hidden;opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.boring-card.visible{opacity:1;transform:translateY(0)}
+.boring-card .thumb{width:100%;aspect-ratio:1/1}
+.boring-card img{width:100%;height:100%;object-fit:cover;display:block}
+.boring-card .overlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);padding:8px;color:var(--accent);font-weight:700;text-align:center}
+/* TITLES */
+.section-title{text-align:center;font-weight:700;color:var(--accent);margin:20px 0;text-transform:uppercase}
+#boring .section-title,#diary .section-title,#more .section-title{font-size:clamp(48px,12vw,120px);letter-spacing:.08em}
+/* MISC */
+.placeholder{text-align:center;font-weight:700;color:var(--accent);padding:80px 0;font-size:24px;text-transform:uppercase}
+.footer{padding:40px 20px;text-align:center;color:var(--muted)}
+.section{scroll-margin-top:64px}
+.top-link{position:fixed;right:18px;bottom:18px;border:1px solid var(--border);background:var(--card);padding:8px 12px;border-radius:999px;color:var(--fg)}
+</style>
 </head>
 <body>
+<!-- 導覽列已依需求移除顯示，但保留 DOM 結構以利未來擴充 -->
+<nav class="nav" aria-hidden="true">
+  <div class="inner">
+    <div class="brand">TRUEMORE</div>
+    <button class="menu-btn" aria-label="Open Menu">+</button>
+    <div class="links">
+      <a href="#home" class="active">HOME</a>
+      <a href="#projects">PROJECTS</a>
+      <a href="#boring">BORING STUFF</a>
+      <a href="#diary">DEV DIARY</a>
+      <a href="#more">AND MORE</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
   <!-- HERO -->
-  <section class="hero" aria-label="Intro">
-    <div class="background-container" aria-hidden="true">
-      <img class="clear-bg" src="https://i.imgur.com/lNQUzoi.jpeg" alt="" />
-      <img class="blurred-bg" id="blurred" src="https://i.imgur.com/lNQUzoi.jpeg" alt="" />
-    </div>
-    <div class="hero-content container">
-      <h1>TRUEMORE</h1>
-      <p>CG GENERALIST &amp; PAINTER</p>
-    </div>
-  </section>
-
-  <!-- ABOUT -->
-  <section class="about-section">
-    <div class="container">
-      <h2>WELCOM3</h2>
-      <p>Hi it's Tru Mo (TrueMore), a CG Generalist. Currently work at MOONSHINE STUDIO &amp; MOONSHINE XR STUDIO as a Technical Artist. 我是做動畫的人。</p>
-    </div>
-  </section>
-
-  <!-- GRID -->
-  <section class="portfolio-wrap">
-    <div class="container">
-      <div class="portfolio-grid" id="portfolio-grid" aria-live="polite">
-        <!-- 1–8 -->
-        <div class="grid-item"><a href="https://www.facebook.com/watch/?v=1039687634047745" target="_blank" rel="noopener"><img loading="lazy" style="object-position:top center" src="https://i.imgur.com/Epiqjg5.jpeg" alt="Project 2" /></a></div>
-        <div class="grid-item"><a href="https://www.youtube.com/watch?v=OuzoLiM-cBU" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/Ofu77yl.jpeg" alt="Project 1" /></a></div>
-        <div class="grid-item"><a href="https://www.youtube.com/watch?v=ZaodEebzfrA" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/P8bvaEy.jpeg" alt="Project 3" /></a></div>
-        <div class="grid-item"><a href="https://www.wepeople.club/tsai_ming_liang-ballantines-40y" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/wjRVFEM.jpeg" alt="Project 4" /></a></div>
-        <div class="grid-item"><a href="https://www.youtube.com/watch?v=8zeXS7s7jok" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/zoiwWxv.jpeg" alt="Project 5" /></a></div>
-        <div class="grid-item"><a href="https://www.youtube.com/watch?v=WkuzC_axw-Q" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/iL5IvXs.jpeg" alt="Project 6" /></a></div>
-        <div class="grid-item"><a href="https://www.youtube.com/watch?v=zPu48_H1jc0" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/uFiG0jo.jpeg" alt="Project 7" /></a></div>
-        <div class="grid-item"><a href="https://www.youtube.com/watch?v=H1jLJC9iT1Q" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/KidEcxY.jpeg" alt="Project 8" /></a></div>
-        <!-- 9–20 (預設隱藏) -->
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=re7LJsYNTOw" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/5VhaPBo.jpeg" alt="Project 9" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://ghsa.org.tw/gha/festival/film/1112" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/4AO50Ow.jpeg" alt="Project 10" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=FVLunYDHXU0" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/QDUddTA.jpeg" alt="Project 11" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.facebook.com/GogoroTaiwan/videos/456928680232538" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/MbcrMi5.jpeg" alt="Project 12" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=AlKkHZD21BU" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/Kyzf2R2.jpeg" alt="Project 13" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=XX-Ai3QyE5k" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/Rs1jbtV.jpeg" alt="Project 14" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=09o9rxMfojE" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/PuBgQSQ.jpeg" alt="Project 15" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=agIcTZ4F404" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/t3eimw1.jpeg" alt="Project 16" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=80jHEKCAdUo" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/SzxGXF4.jpeg" alt="Project 17" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=P1z_urxDTk8&list=PLmst0aQNinPn5AX5ruT3E5u4glOFh_v8y" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/CDmSfM8.jpeg" alt="Project 18" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=b3S2XUynKvk&t=13796s" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/k9QihqK.jpeg" alt="Project 19" /></a></div>
-        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=qPTjbi74MDM" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/n0TxfhY.jpeg" alt="Project 20" /></a></div>
-      </div>
-      <div class="more-container">
-        <button id="show-more" class="btn" aria-expanded="false" aria-controls="portfolio-grid">MORE ˅</button>
+  <section id="home" class="section">
+    <div class="hero">
+      <div class="image"><img id="hero-img" alt="Hero" /></div>
+      <div>
+        <h1 id="hero-title"></h1>
+        <p id="hero-sub"></p>
       </div>
     </div>
   </section>
 
-  <!-- VIDEOS -->
-  <section class="video-section">
-    <div class="container">
-      <h2>ANIMATION DIRECTOR</h2>
-      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/tXtDOLzmwvk?si=Re-raQz3VgtwUfAV" title="Director Reel 1" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/_pXLO7jGqDw?si=F5ZOz45FU5PO9Ya6" title="Director Reel 2" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/6CW_NHSYdY4?si=1fiCuHQ2ZYDPqgP6" title="Director Reel 3" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/2HeEQuFSomc?si=Lo17jw8FD-sZYvZ_" title="Director Reel 4" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-    </div>
+  <!-- PROJECTS -->
+  <section id="projects" class="section">
+    <div id="projects-grid"></div>
   </section>
 
-  <!-- LINKS -->
-  <section class="and-more-section">
-    <div class="container">
-      <h2>AND MORE…</h2>
-      <div class="and-more-buttons">
-        <a href="https://www.instagram.com/w15h_y0u_w3r3_h3r3_/?next=/" target="_blank" rel="noopener"><button>Instagram</button></a>
-        <a href="https://vimeo.com/user175818517" target="_blank" rel="noopener"><button>Vimeo</button></a>
-        <a href="https://www.youtube.com/@truemore6591/videos" target="_blank" rel="noopener"><button>YouTube</button></a>
-      </div>
-    </div>
+  <!-- BORING STUFF -->
+  <section id="boring" class="section">
+    <div class="section-title">BORING STUFF</div>
+    <div class="boring-grid" id="boring-grid"></div>
   </section>
 
-  <script>
-    // ----- Smooth spotlight mask without spamming layout -----
-    const blurred = document.getElementById('blurred');
-    let raf = null, x=0, y=0;
-    document.addEventListener('mousemove', (e)=>{ x=e.clientX; y=e.clientY; if(!raf){ raf=requestAnimationFrame(()=>{ blurred.style.setProperty('--x', x+'px'); blurred.style.setProperty('--y', y+'px'); raf=null; }); }});
+  <!-- DIARY (placeholder) -->
+  <section id="diary" class="section">
+    <div class="section-title">DEV DIARY</div>
+    <div class="placeholder">COMING SOON...</div>
+  </section>
 
-    // ----- Show more -----
-    const btn = document.getElementById('show-more');
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.grid-item.is-hidden').forEach(el=>el.classList.remove('is-hidden'));
-      btn.setAttribute('aria-expanded','true');
-      btn.style.display='none';
-    });
+  <!-- MORE -->
+  <section id="more" class="section">
+    <div class="section-title">AND MORE…</div>
+    <p style="text-align:center;font-weight:700;"><a id="email-link"></a></p>
+  </section>
+</main>
 
-    // Accessibility: keyboard activate on Enter/Space
-    btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); } });
-  </script>
+<a class="top-link" href="#home">▲ Top</a>
+<div class="footer">© TRUEMORE — All rights reserved.</div>
+
+<script>
+// ===== Data =====
+const hero = {title:'TRUEMORE', subtitle:'ANIMATION DIRECTOR & CG GENERALIST', image:'https://i.ibb.co/x887ZyJN/image.png'};
+function ytThumb(url){
+  const m = url && (url.match(/[?&]v=([\w-]{11})/) || url.match(/youtu\.be\/([\w-]{11})/));
+  return m ? `https://img.youtube.com/vi/${m[1]}/maxresdefault.jpg` : '';
+}
+// 專案清單（14 筆；順序不變。金馬卡片套用置頂裁切，不變動排序）
+const projects = [
+  {name:'亞洲電子競技公開賽', role:'ANIMATION DIRECTOR', url:'https://youtu.be/tXtDOLzmwvk'},
+  {name:'MSIology｜Dragonforged Dominance', role:'ANIMATION DIRECTOR', url:'https://youtu.be/_pXLO7jGqDw'},
+  {name:'96分鐘', role:'ANIMATION DIRECTOR', url:'https://www.youtube.com/watch?v=55MGF0stYzk'},
+  {name:'2024金馬年度廣告', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Epiqjg5.jpeg', url:'https://www.facebook.com/watch/?v=103968763404...'},
+  {name:'台灣福斯商旅', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Ofu77yl.jpeg', url:'https://www.youtube.com/watch?v=OuzoLiM-cBU'},
+  {name:'雙吳推薦｜御茶園 真好茶', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/P8bvaEy.jpeg', url:'https://www.youtube.com/watch?v=ZaodEebzfrA'},
+  {name:'百齡罈40年｜大師之路系列', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/wjRVFEM.jpeg', url:'https://www.wepeople.club/tsai_ming_liang-ball...'},
+  {name:'動力火車 X 林俊傑｜俯衝的靈魂', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/zoiwWxv.jpeg', url:'https://www.youtube.com/watch?v=8zeXS7s7jok'},
+  {name:'潘朵拉｜命運先知', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/iL5IvXs.jpeg', url:'https://www.youtube.com/watch?v=WkuzC_axw-Q'},
+  {name:'亞培葡勝納｜戴資穎推薦', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/uFiG0jo.jpeg', url:'https://www.youtube.com/watch?v=zPu48_H1jc0'},
+  {name:'滅火器 X 戰酒黑金龍 Stronger Together', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/KidEcxY.jpeg', url:'https://www.youtube.com/watch?v=H1jLJC9iT1Q'},
+  {name:'格蘭利威年度大片｜創 新自我', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/5VhaPBo.jpeg', url:'https://www.youtube.com/watch?v=re7LJsYNTOw'},
+  {name:'46屆金穗獎｜對面 Home for Sale', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/4AO50Ow.jpeg', url:'https://ghsa.org.tw/gha/festival/film/1112'},
+  {name:'Claw A1M｜Grip and Game | MSI', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Kyzf2R2.jpeg', url:'https://www.youtube.com/watch?v=AlKkHZD21BU'}
+];
+const boring = [
+  {name:'SCREEAAM', thumb:'https://i.ibb.co/mrFkVpBp/A.png', url:'https://www.instagram.com/p/C60CLmAPdUy/?igsh=MW12bmYxNm42NXF1bg=='},
+  {name:"RIDER'S ON THE STONE", thumb:'https://i.ibb.co/GQTPVY2b/B.png', url:'https://www.instagram.com/reel/CzbiKlSPUpA/?igsh=MThjdnF6NmR1aGNvZg=='},
+  {name:'PINKCHAIN', thumb:'https://i.ibb.co/YCyfj2m/C.png', url:'https://www.instagram.com/p/C5znpsAP3De/?igsh=bW55bnJ0bG9pZ3J1'}
+];
+const email = 'truemore1309@gmail.com';
+
+// ===== Render =====
+// Hero
+const heroImg=document.getElementById('hero-img'); heroImg.src = hero.image;
+document.getElementById('hero-title').textContent = hero.title;
+document.getElementById('hero-sub').textContent = hero.subtitle;
+
+// Projects
+const pg = document.getElementById('projects-grid');
+pg.innerHTML = '';
+projects.forEach((p,i)=>{
+  const a=document.createElement('a');
+  a.className='project-card';
+  if(p.name && p.name.includes('金馬')){ a.classList.add('top-crop'); }
+  a.href=p.url||'#';
+  if(p.url) {a.target='_blank'; a.rel='noopener';}
+  const thumb = p.thumb || ytThumb(p.url) || hero.image; // triple fallback，避免空白
+  const roleText = i>=2 ? 'CG GENERALIST' : (p.role||'');
+  a.innerHTML = `
+    <div class="thumb"><img src="${thumb}" alt="${p.name}"></div>
+    <div class="overlay"><div class="title">${p.name}</div><div class="role">${roleText}</div></div>
+  `;
+  pg.appendChild(a);
+});
+
+// Boring Stuff
+const bg = document.getElementById('boring-grid');
+bg.innerHTML='';
+boring.forEach(b=>{
+  const a=document.createElement('a');
+  a.className='boring-card';
+  a.href=b.url||'#';
+  if(b.url) {a.target='_blank'; a.rel='noopener';}
+  a.innerHTML = `
+    <div class="thumb"><img src="${b.thumb}" alt="${b.name}"></div>
+    <div class="overlay">${b.name}</div>
+  `;
+  bg.appendChild(a);
+});
+
+// Email
+const el = document.getElementById('email-link');
+el.href = `mailto:${email}`;
+el.textContent = email;
+
+// Reveal on scroll
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+},{threshold:0.1});
+
+document.querySelectorAll('.project-card,.boring-card').forEach(el=>observer.observe(el));
+
+// ===== Tests (do not modify unless specs change) =====
+(function tests(){
+  const fail=(m)=>{console.error('[TEST FAIL]',m); const id='test-warn'; let b=document.getElementById(id); if(!b){b=document.createElement('div'); b.id=id; b.style.cssText='position:fixed;left:0;right:0;bottom:0;background:#b00020;color:#fff;padding:8px 12px;z-index:9999;font-size:12px;text-align:center'; b.textContent='Some tests failed. Open console for details.'; document.body.appendChild(b);} };
+
+  // 1) 基本資料完整
+  if(!Array.isArray(projects)||projects.length<1) fail('projects array is empty');
+  if(projects.length!==14) fail('expected 14 projects, got '+projects.length);
+  if(projects.some(p=>!p.url)) fail('one or more projects missing url');
+
+  // 2) 金馬卡片存在且套用置頂裁切
+  if(!projects.some(p=> (p.name||'').includes('金馬'))) fail('金馬 project missing');
+  const titles=[...document.querySelectorAll('.project-card .title')];
+  const idx=titles.findIndex(el=> (el.textContent||'').includes('金馬'));
+  if(idx===-1) fail('金馬 card not in DOM');
+  const cards=[...document.querySelectorAll('.project-card')];
+  if(idx>-1 && cards[idx] && !cards[idx].classList.contains('top-crop')) fail('金馬 card missing top-crop class');
+
+  // 3) 職稱顯示邏輯：前兩個 AD；第三個起 CG
+  const roles=[...document.querySelectorAll('.project-card .role')].map(el=>el.textContent.trim());
+  if(roles.length!==projects.length) fail('roles DOM length mismatch');
+  if(roles[0] !== 'ANIMATION DIRECTOR' || roles[1] !== 'ANIMATION DIRECTOR') fail('first two roles should be ANIMATION DIRECTOR');
+  if(roles[2] !== 'CG GENERALIST' || roles.slice(2).some(r=>r!=='CG GENERALIST')) fail('roles after index 2 should all be CG GENERALIST');
+
+  // 4) 每張專案卡片都要有圖
+  const imgs=[...document.querySelectorAll('.project-card img')];
+  if(imgs.length!==projects.length) fail('project images render count mismatch');
+  if(imgs.some(img=>!img.getAttribute('src'))) fail('one or more project images missing src');
+
+  // 5) Hero 與 Email 正確渲染
+  if(!(heroImg.getAttribute('src')||'').length) fail('hero image not set');
+  const mail=document.getElementById('email-link');
+  if(!(mail.getAttribute('href')||'').startsWith('mailto:')) fail('email link not set');
+})();
+</script>
 </body>
 </html>
