@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Truemore Portfolio</title>
+  <meta name="description" content="Tru Mo (TrueMore) • CG Generalist & Painter • Selected works and directing reels." />
+  <link rel="preconnect" href="https://i.imgur.com" crossorigin>
+  <style>
+    :root{
+      --bg: #000; --bg-2:#111; --bg-3:#222; --fg:#fff; --muted:#cbd5e1; --accent:#fff;
+    }
+    *{box-sizing:border-box}
+    html,body{background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif}
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1200px; margin:0 auto; padding:0 20px}
+
+    /* Hero */
+    .hero{position:relative; min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; overflow:hidden}
+    .background-container{position:absolute; inset:0; pointer-events:none}
+    .clear-bg,.blurred-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center}
+    .blurred-bg{filter:brightness(.55) blur(2px); transform:scale(1.05); mask-image:radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 320px); -webkit-mask-image:radial-gradient(circle at var(--x,50%) var(--y,50%), transparent 180px, black 320px)}
+    .hero-content{position:relative; z-index:1; will-change:opacity,transform; opacity:0; transform:translateY(8px); animation:fadeIn .8s ease .35s forwards}
+    .hero h1{font-size:clamp(40px,8vw,72px); font-weight:700; letter-spacing:.08em}
+    .hero p{margin-top:10px; font-size:clamp(14px,2.4vw,20px); color:#ddd}
+
+    @keyframes fadeIn{to{opacity:1; transform:none}}
+
+    /* About */
+    .about-section{background:#900; color:#fff; padding:80px 0; text-align:center}
+    .about-section h2{font-size:clamp(28px,4.5vw,48px); margin-bottom:12px}
+    .about-section p{font-size:clamp(14px,2.2vw,18px); max-width:720px; margin:0 auto; line-height:1.8}
+
+    /* Grid */
+    .portfolio-wrap{padding:24px 0 8px}
+    .portfolio-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px}
+    .grid-item{aspect-ratio:16/9; overflow:hidden; background:#0a0a0a; border-radius:10px}
+    .grid-item img{width:100%; height:100%; object-fit:cover; transition:transform .3s ease, box-shadow .3s ease; display:block}
+    .grid-item a:focus-visible img, .grid-item img:hover{transform:scale(1.04); box-shadow:0 10px 28px rgba(255,255,255,.12)}
+    .grid-item.is-hidden{display:none}
+    .more-container{padding:16px 0 32px}
+    .btn{display:block; width:100%; background:#fff; color:#000; border:0; padding:12px 0; font-size:16px; border-radius:8px; cursor:pointer}
+    .btn:focus-visible{outline:2px solid #9ef; outline-offset:2px}
+
+    /* Videos */
+    .video-section{background:var(--bg-2); padding:56px 0; text-align:center}
+    .video-section h2{font-size:clamp(24px,4vw,40px); margin-bottom:24px}
+    .video-wrapper{width:min(92vw,960px); aspect-ratio:16/9; margin:0 auto 24px; border-radius:12px; overflow:hidden; background:#000}
+    .video-wrapper iframe{width:100%; height:100%; border:0}
+
+    /* Links */
+    .and-more-section{padding:56px 0; background:var(--bg-3); text-align:center}
+    .and-more-section h2{font-size:clamp(24px,4vw,40px); margin-bottom:24px}
+    .and-more-buttons{display:flex; flex-wrap:wrap; justify-content:center; gap:12px}
+    .and-more-buttons a button{background:#fff; color:#000; border:0; padding:10px 20px; font-size:16px; border-radius:999px; cursor:pointer}
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .hero-content{animation:none; opacity:1; transform:none}
+      .blurred-bg{filter:brightness(.55)}
+    }
+  </style>
+</head>
+<body>
+  <!-- HERO -->
+  <section class="hero" aria-label="Intro">
+    <div class="background-container" aria-hidden="true">
+      <img class="clear-bg" src="https://i.imgur.com/lNQUzoi.jpeg" alt="" />
+      <img class="blurred-bg" id="blurred" src="https://i.imgur.com/lNQUzoi.jpeg" alt="" />
+    </div>
+    <div class="hero-content container">
+      <h1>TRUEMORE</h1>
+      <p>CG GENERALIST &amp; PAINTER</p>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section">
+    <div class="container">
+      <h2>WELCOM3</h2>
+      <p>Hi it's Tru Mo (TrueMore), a CG Generalist. Currently work at MOONSHINE STUDIO &amp; MOONSHINE XR STUDIO as a Technical Artist. 我是做動畫的人。</p>
+    </div>
+  </section>
+
+  <!-- GRID -->
+  <section class="portfolio-wrap">
+    <div class="container">
+      <div class="portfolio-grid" id="portfolio-grid" aria-live="polite">
+        <!-- 1–8 -->
+        <div class="grid-item"><a href="https://www.facebook.com/watch/?v=1039687634047745" target="_blank" rel="noopener"><img loading="lazy" style="object-position:top center" src="https://i.imgur.com/Epiqjg5.jpeg" alt="Project 2" /></a></div>
+        <div class="grid-item"><a href="https://www.youtube.com/watch?v=OuzoLiM-cBU" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/Ofu77yl.jpeg" alt="Project 1" /></a></div>
+        <div class="grid-item"><a href="https://www.youtube.com/watch?v=ZaodEebzfrA" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/P8bvaEy.jpeg" alt="Project 3" /></a></div>
+        <div class="grid-item"><a href="https://www.wepeople.club/tsai_ming_liang-ballantines-40y" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/wjRVFEM.jpeg" alt="Project 4" /></a></div>
+        <div class="grid-item"><a href="https://www.youtube.com/watch?v=8zeXS7s7jok" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/zoiwWxv.jpeg" alt="Project 5" /></a></div>
+        <div class="grid-item"><a href="https://www.youtube.com/watch?v=WkuzC_axw-Q" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/iL5IvXs.jpeg" alt="Project 6" /></a></div>
+        <div class="grid-item"><a href="https://www.youtube.com/watch?v=zPu48_H1jc0" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/uFiG0jo.jpeg" alt="Project 7" /></a></div>
+        <div class="grid-item"><a href="https://www.youtube.com/watch?v=H1jLJC9iT1Q" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/KidEcxY.jpeg" alt="Project 8" /></a></div>
+        <!-- 9–20 (預設隱藏) -->
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=re7LJsYNTOw" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/5VhaPBo.jpeg" alt="Project 9" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://ghsa.org.tw/gha/festival/film/1112" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/4AO50Ow.jpeg" alt="Project 10" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=FVLunYDHXU0" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/QDUddTA.jpeg" alt="Project 11" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.facebook.com/GogoroTaiwan/videos/456928680232538" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/MbcrMi5.jpeg" alt="Project 12" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=AlKkHZD21BU" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/Kyzf2R2.jpeg" alt="Project 13" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=XX-Ai3QyE5k" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/Rs1jbtV.jpeg" alt="Project 14" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=09o9rxMfojE" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/PuBgQSQ.jpeg" alt="Project 15" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=agIcTZ4F404" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/t3eimw1.jpeg" alt="Project 16" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=80jHEKCAdUo" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/SzxGXF4.jpeg" alt="Project 17" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=P1z_urxDTk8&list=PLmst0aQNinPn5AX5ruT3E5u4glOFh_v8y" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/CDmSfM8.jpeg" alt="Project 18" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=b3S2XUynKvk&t=13796s" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/k9QihqK.jpeg" alt="Project 19" /></a></div>
+        <div class="grid-item is-hidden"><a href="https://www.youtube.com/watch?v=qPTjbi74MDM" target="_blank" rel="noopener"><img loading="lazy" src="https://i.imgur.com/n0TxfhY.jpeg" alt="Project 20" /></a></div>
+      </div>
+      <div class="more-container">
+        <button id="show-more" class="btn" aria-expanded="false" aria-controls="portfolio-grid">MORE ˅</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEOS -->
+  <section class="video-section">
+    <div class="container">
+      <h2>ANIMATION DIRECTOR</h2>
+      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/tXtDOLzmwvk?si=Re-raQz3VgtwUfAV" title="Director Reel 1" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/_pXLO7jGqDw?si=F5ZOz45FU5PO9Ya6" title="Director Reel 2" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/6CW_NHSYdY4?si=1fiCuHQ2ZYDPqgP6" title="Director Reel 3" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <div class="video-wrapper"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/2HeEQuFSomc?si=Lo17jw8FD-sZYvZ_" title="Director Reel 4" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    </div>
+  </section>
+
+  <!-- LINKS -->
+  <section class="and-more-section">
+    <div class="container">
+      <h2>AND MORE…</h2>
+      <div class="and-more-buttons">
+        <a href="https://www.instagram.com/w15h_y0u_w3r3_h3r3_/?next=/" target="_blank" rel="noopener"><button>Instagram</button></a>
+        <a href="https://vimeo.com/user175818517" target="_blank" rel="noopener"><button>Vimeo</button></a>
+        <a href="https://www.youtube.com/@truemore6591/videos" target="_blank" rel="noopener"><button>YouTube</button></a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ----- Smooth spotlight mask without spamming layout -----
+    const blurred = document.getElementById('blurred');
+    let raf = null, x=0, y=0;
+    document.addEventListener('mousemove', (e)=>{ x=e.clientX; y=e.clientY; if(!raf){ raf=requestAnimationFrame(()=>{ blurred.style.setProperty('--x', x+'px'); blurred.style.setProperty('--y', y+'px'); raf=null; }); }});
+
+    // ----- Show more -----
+    const btn = document.getElementById('show-more');
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.grid-item.is-hidden').forEach(el=>el.classList.remove('is-hidden'));
+      btn.setAttribute('aria-expanded','true');
+      btn.style.display='none';
+    });
+
+    // Accessibility: keyboard activate on Enter/Space
+    btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); } });
+  </script>
+</body>
+</html>
