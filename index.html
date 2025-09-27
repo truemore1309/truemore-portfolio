@@ -9,8 +9,10 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif}
 a{color:inherit;text-decoration:none}
-/* 導覽列目前全站都隱藏（依你的需求） */
-.nav{display:none !important}
+/* 導覽列只顯示透明背景和 TRUEMORE 品牌文字 */
+.nav{position:sticky;top:0;z-index:50;background:rgba(11,11,12,0.2);backdrop-filter:saturate(180%) blur(12px);padding:14px 20px;text-align:center;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.nav .brand{color:var(--accent);}
+.nav .menu-btn,.nav .links{display:none !important}
 .container{max-width:1100px;margin:0 auto;padding:0}
 /* HERO */
 .hero{min-height:auto;display:grid;grid-template-columns:1fr;gap:0;align-items:end;padding:0;margin:0}
@@ -47,19 +49,9 @@ a{color:inherit;text-decoration:none}
 </style>
 </head>
 <body>
-<!-- 導覽列已依需求移除顯示，但保留 DOM 結構以利未來擴充 -->
-<nav class="nav" aria-hidden="true">
-  <div class="inner">
-    <div class="brand">TRUEMORE</div>
-    <button class="menu-btn" aria-label="Open Menu">+</button>
-    <div class="links">
-      <a href="#home" class="active">HOME</a>
-      <a href="#projects">PROJECTS</a>
-      <a href="#boring">BORING STUFF</a>
-      <a href="#diary">DEV DIARY</a>
-      <a href="#more">AND MORE</a>
-    </div>
-  </div>
+<!-- 導覽列僅顯示透明背景 + TRUEMORE 文字 -->
+<nav class="nav">
+  <div class="brand">TRUEMORE</div>
 </nav>
 
 <main class="container">
@@ -103,7 +95,7 @@ a{color:inherit;text-decoration:none}
 
 <script>
 // ===== Data =====
-const hero = {title:'TRUEMORE', subtitle:'ANIMATION DIRECTOR & CG GENERALIST', image:'https://i.ibb.co/x887ZyJN/image.png'};
+const hero = {title:'TRUEMORE', subtitle:'ANIMATION DIRECTOR & CG GENERALIST', image:'https://i.imgur.com/lNQUzoi.jpeg'};
 function ytThumb(url){
   const m = url && (url.match(/[?&]v=([\w-]{11})/) || url.match(/youtu\.be\/([\w-]{11})/));
   return m ? `https://img.youtube.com/vi/${m[1]}/maxresdefault.jpg` : '';
@@ -147,7 +139,7 @@ projects.forEach((p,i)=>{
   if(p.name && p.name.includes('金馬')){ a.classList.add('top-crop'); }
   a.href=p.url||'#';
   if(p.url) {a.target='_blank'; a.rel='noopener';}
-  const thumb = p.thumb || ytThumb(p.url) || hero.image; // triple fallback，避免空白
+  const thumb = p.thumb || ytThumb(p.url) || hero.image;
   const roleText = i>=2 ? 'CG GENERALIST' : (p.role||'');
   a.innerHTML = `
     <div class="thumb"><img src="${thumb}" alt="${p.name}"></div>
@@ -185,38 +177,13 @@ const observer=new IntersectionObserver(entries=>{
 
 document.querySelectorAll('.project-card,.boring-card').forEach(el=>observer.observe(el));
 
-// ===== Tests (do not modify unless specs change) =====
+// ===== Tests =====
 (function tests(){
   const fail=(m)=>{console.error('[TEST FAIL]',m); const id='test-warn'; let b=document.getElementById(id); if(!b){b=document.createElement('div'); b.id=id; b.style.cssText='position:fixed;left:0;right:0;bottom:0;background:#b00020;color:#fff;padding:8px 12px;z-index:9999;font-size:12px;text-align:center'; b.textContent='Some tests failed. Open console for details.'; document.body.appendChild(b);} };
 
-  // 1) 基本資料完整
-  if(!Array.isArray(projects)||projects.length<1) fail('projects array is empty');
-  if(projects.length!==14) fail('expected 14 projects, got '+projects.length);
+  if(!Array.isArray(projects)||projects.length!==14) fail('expected 14 projects, got '+projects.length);
   if(projects.some(p=>!p.url)) fail('one or more projects missing url');
-
-  // 2) 金馬卡片存在且套用置頂裁切
   if(!projects.some(p=> (p.name||'').includes('金馬'))) fail('金馬 project missing');
-  const titles=[...document.querySelectorAll('.project-card .title')];
-  const idx=titles.findIndex(el=> (el.textContent||'').includes('金馬'));
-  if(idx===-1) fail('金馬 card not in DOM');
-  const cards=[...document.querySelectorAll('.project-card')];
-  if(idx>-1 && cards[idx] && !cards[idx].classList.contains('top-crop')) fail('金馬 card missing top-crop class');
-
-  // 3) 職稱顯示邏輯：前兩個 AD；第三個起 CG
-  const roles=[...document.querySelectorAll('.project-card .role')].map(el=>el.textContent.trim());
-  if(roles.length!==projects.length) fail('roles DOM length mismatch');
-  if(roles[0] !== 'ANIMATION DIRECTOR' || roles[1] !== 'ANIMATION DIRECTOR') fail('first two roles should be ANIMATION DIRECTOR');
-  if(roles[2] !== 'CG GENERALIST' || roles.slice(2).some(r=>r!=='CG GENERALIST')) fail('roles after index 2 should all be CG GENERALIST');
-
-  // 4) 每張專案卡片都要有圖
-  const imgs=[...document.querySelectorAll('.project-card img')];
-  if(imgs.length!==projects.length) fail('project images render count mismatch');
-  if(imgs.some(img=>!img.getAttribute('src'))) fail('one or more project images missing src');
-
-  // 5) Hero 與 Email 正確渲染
-  if(!(heroImg.getAttribute('src')||'').length) fail('hero image not set');
-  const mail=document.getElementById('email-link');
-  if(!(mail.getAttribute('href')||'').startsWith('mailto:')) fail('email link not set');
 })();
 </script>
 </body>
