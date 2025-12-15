@@ -84,13 +84,24 @@
         #game-container {
             position: relative;
             z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
             width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
+            height: 100%;
+            /* 讓容器可捲動，解決手機版內容被切掉的問題 */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            
+            display: flex;
+            flex-direction: column;
+            /* 使用 min-height 搭配 justify-content，確保內容少時置中，多時可捲動 */
+            justify-content: center; 
+            align-items: center;
+        }
+
+        /* 當內容高度超過視窗時，讓 flex item 能夠正常延展 */
+        #game-container::before, #game-container::after {
+            content: '';
+            flex-shrink: 0;
+            height: 40px; /* 上下留白 */
         }
 
         /* --- 卡片樣式 (一般問題模式) --- */
@@ -104,10 +115,12 @@
             padding: 40px;
             border-radius: 24px;
             max-width: 600px;
-            width: 100%;
+            width: 90%; /* 手機版留邊 */
             text-align: center;
             transition: all 0.5s ease;
             position: relative;
+            flex-shrink: 0; /* 防止被壓縮 */
+            margin: auto; /* 關鍵：讓 flex item 在溢出時能正確置中 */
         }
 
         /* --- 滿版樣式 (結果模式通用) --- */
@@ -121,13 +134,24 @@
             border-radius: 0;
             border: none;
             box-shadow: none;
+            
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* 垂直置中 */
             align-items: center;
-            padding: 20px;
-            z-index: 15; /* 確保在泡泡之上 */
-            transition: background 1s ease; /* 讓背景切換更柔和 */
+            padding: 80px 20px 40px; /* 上方留空間給 Home 按鈕 */
+            z-index: 15;
+            
+            /* 讓滿版卡片本身可捲動 */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 手機版滿版調整：避免置中導致頭尾被切 */
+        @media (max-height: 600px) {
+            .card.fullscreen {
+                justify-content: flex-start;
+            }
         }
 
         /* --- 特殊結果背景設定 --- */
