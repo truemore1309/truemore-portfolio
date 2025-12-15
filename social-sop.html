@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帶來幸福的社交SOP</title>
+    <style>
+        /* --- 全局設定 --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            overflow: hidden;
+            /* 預設背景，平時會被泡泡覆蓋 */
+            background: linear-gradient(180deg, #ffd1ff 0%, #c4dafa 100%);
+        }
+
+        /* --- 背景容器 (放泡泡用的) --- */
+        #background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        /* --- 碎紙花容器 (放歡樂動畫用的) --- */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20; /* 比卡片更高層級 */
+            overflow: hidden;
+            pointer-events: none; /* 不阻擋點擊 */
+            display: none; /* 預設隱藏 */
+        }
+
+        /* --- 泡泡動畫基礎設定 --- */
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            animation: floatUp linear infinite;
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 0.9; }
+            100% { transform: translateY(-120vh) scale(1.1); opacity: 0; }
+        }
+
+        /* --- 碎紙花動畫設定 (聊天用) --- */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0.8;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* --- 【新增】平靜流動動畫設定 (平靜用) --- */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- 遊戲主容器 --- */
+        #game-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 卡片樣式 (一般問題模式) --- */
+        .card {
+            background: rgba(255, 255, 255, 0.35); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        /* --- 滿版樣式 (結果模式通用) --- */
+        .card.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 15; /* 確保在泡泡之上 */
+            transition: background 1s ease; /* 讓背景切換更柔和 */
+        }
+
+        /* --- 特殊結果背景設定 --- */
+        
+        /* 【修改】平靜結果背景：加入柔和流動動畫 */
+        .card.fullscreen.theme-calm {
+             /* 使用柔和的紫藍色漸層，並設定為 200% 大小以便移動 */
+             background: linear-gradient(135deg, rgba(209, 196, 233, 0.9) 0%, rgba(179, 229, 252, 0.9) 100%);
+             background-size: 200% 200%;
+             backdrop-filter: blur(10px);
+             /* 套用緩慢流動的動畫 */
+             animation: gradientShift 15s ease infinite;
+        }
+
+        /* 聊天結果背景 (充滿幸福的粉紅色) */
+        .card.fullscreen.theme-chat {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffd1ff 100%);
+        }
+
+        /* 標題與文字 */
+        .card h2 {
+            color: #4a4a4a;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+        }
+
+        .card p {
+            color: #555;
+            margin-bottom: 35px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            font-weight: 500;
+            max-width: 600px;
+        }
+
+        .card.fullscreen h2 {
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+        }
+
+        /* --- 按鈕群組 --- */
+        .btn-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* --- 按鈕樣式 --- */
+        button {
+            flex: 1;
+            background: rgba(255, 117, 140, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 16px 20px;
+            font-size: 1rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 117, 140, 0.3);
+            white-space: normal;
+            line-height: 1.4;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background: rgba(255, 94, 120, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 117, 140, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* 次要按鈕 (再測一次) */
+        button.secondary {
+            background: rgba(166, 193, 238, 0.9);
+            box-shadow: 0 4px 15px rgba(166, 193, 238, 0.4);
+            max-width: 300px;
+        }
+        
+        button.secondary:hover {
+            background: rgba(132, 169, 229, 1);
+        }
+
+        /* --- 轉場動畫 --- */
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- RWD 手機版調整 --- */
+        @media (max-width: 480px) {
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            .card {
+                padding: 30px 20px;
+            }
+            .card.fullscreen h2 {
+                font-size: 1.8rem;
+            }
+            .home-btn {
+                top: 15px; left: 15px;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* --- HOME BUTTON --- */
+        .home-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 100;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 99px;
+            color: #555;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: translateX(-3px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.15);
+            color: #e84393;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="background-container"></div>
+    <div id="confetti-container"></div>
+
+    <!-- Home Button -->
+    <a href="index.html" class="home-btn">← BACK TO TRUEMORE</a>
+
+    <div id="game-container">
+        <div id="card" class="card fade-in">
+            </div>
+    </div>
+
+    <script>
+        // --- 泡泡背景生成 (常駐) ---
+        function createBubbles() {
+            const container = document.getElementById('background-container');
+            const bubbleCount = 30; 
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20; 
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                const duration = Math.random() * 8 + 6; 
+                const delay = Math.random() * 5;
+                bubble.style.animationDuration = `${duration}s`;
+                bubble.style.animationDelay = `${delay}s`;
+                container.appendChild(bubble);
+            }
+        }
+        createBubbles();
+
+        // --- 歡樂碎紙花動畫控制 (聊天用) ---
+        const confettiContainer = document.getElementById('confetti-container');
+        let confettiInterval;
+
+        function startConfetti() {
+            confettiContainer.style.display = 'block';
+            confettiContainer.innerHTML = ''; 
+
+            const colors = ['#ff5e57', '#ffdd59', '#05c46b', '#0fbcf9', '#d63031', '#e84393', '#ffffff'];
+
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.width = Math.random() * 12 + 6 + 'px';
+                confetti.style.height = Math.random() * 12 + 6 + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const duration = Math.random() * 4 + 3; 
+                const delay = Math.random() * 3; 
+                confetti.style.animation = `confettiFall ${duration}s linear infinite ${delay}s`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        function stopConfetti() {
+            confettiContainer.style.display = 'none';
+            confettiContainer.innerHTML = ''; 
+        }
+
+
+        // --- 節點資料 ---
+        const nodes = {
+            intro: {
+                title: "帶來幸福的社交 SOP",
+                desc: "生活充斥著難以避免的社交嗎？<br>邀請想與你社交的對象，一起評估你是否能維持內心平靜吧。",
+                options: [
+                    { text: "開始評估", next: "q_small_talk" }
+                ]
+            },
+            q_small_talk: {
+                title: "是閒聊嗎？",
+                desc: "確認對話的性質是輕鬆的還是嚴肅的。",
+                options: [
+                    { text: "不是，有正事", next: "q_my_fault" },
+                    { text: "是，只是閒聊", next: "q_scolded" } 
+                ]
+            },
+            q_scolded: {
+                title: "有人會被罵嗎？",
+                desc: "預判這場對話的氣氛走向...",
+                options: [
+                    { text: "沒有人被罵", next: "q_tired" },
+                    { text: "有，對方想要發牢騷放鬆", next: "res_calm" }
+                ]
+            },
+            q_my_fault: {
+                title: "是我造成的嗎？",
+                desc: "關於事情的起因與責任...",
+                options: [
+                    { text: "不是我", next: "res_calm" },
+                    { text: "是我造成的", next: "q_meds" }
+                ]
+            },
+            q_tired: {
+                title: "我現在累嗎？",
+                desc: "誠實面對自己的能量狀態。",
+                options: [
+                    { text: "有點累了", next: "res_calm" },
+                    { text: "我不累", next: "res_chat" }
+                ]
+            },
+            q_meds: {
+                title: "身心狀態檢視",
+                desc: "對方或我有用藥，或精神不好嗎？",
+                options: [
+                    { text: "狀態欠佳", next: "res_calm" },
+                    { text: "狀況良好", next: "q_trouble" }
+                ]
+            },
+            q_trouble: {
+                title: "如果不討論的話...",
+                desc: "對方會因此感到很困擾嗎？",
+                options: [
+                    { text: "不會困擾", next: "res_calm" },
+                    { text: "會很困擾", next: "res_chat" }
+                ]
+            },
+            // --- 結果頁面 ---
+            res_calm: {
+                type: "result",
+                theme: "calm",
+                title: "✨ 我想保持內心平靜 ✨",
+                desc: "現在可能不是社交的最佳時機。<br>保護自己的能量，禮貌地結束或延後對話，讓自己回到平靜的狀態。",
+                options: [
+                    { text: "再測一次", next: "intro", style: "secondary" }
+                ]
+            },
+            res_chat: {
+                type: "result",
+                theme: "chat",
+                title: "🎉 那來聊天吧！ 🎉",
+                desc: "現在的狀態很適合交流！<br>享受這場對話，或許會有意想不到的收穫喔。",
+                options: [
+                    { text: "再測一次", next: "intro", style: "secondary" }
+                ]
+            }
+        };
+
+        const card = document.getElementById('card');
+
+        function renderNode(nodeKey) {
+            const node = nodes[nodeKey];
+            
+            // 1. 清理工作：停止所有特殊動畫，移除舊 class
+            stopConfetti();
+            card.classList.remove('fullscreen', 'theme-calm', 'theme-chat');
+            // 移除可能存在的行內樣式動畫(以防萬一)
+            card.style.animation = ''; 
+            
+            // 2. 重置卡片內容與轉場動畫
+            card.innerHTML = '';
+            card.classList.remove('fade-in');
+            void card.offsetWidth; // Trigger reflow
+            card.classList.add('fade-in');
+
+            // 3. 判斷是否為結果頁面，並套用對應樣式與動畫
+            if (node.type === 'result') {
+                card.classList.add('fullscreen');
+                // 加上主題 class 以便 CSS 變更背景色
+                card.classList.add(`theme-${node.theme}`);
+
+                // 如果是聊天結果，啟動歡樂動畫
+                if (node.theme === 'chat') {
+                    startConfetti();
+                }
+                // 如果是平靜結果，CSS 會自動套用 gradientShift 動畫
+            }
+
+            // 4. 建立標題與內容
+            const h2 = document.createElement('h2');
+            h2.innerHTML = node.title;
+            if (node.type === 'result') {
+                // 結果頁標題顏色微調
+                h2.style.color = node.theme === 'calm' ? '#8e44ad' : '#ff5e57';
+            }
+            card.appendChild(h2);
+
+            if (node.desc) {
+                const p = document.createElement('p');
+                p.innerHTML = node.desc;
+                card.appendChild(p);
+            }
+
+            // 5. 建立按鈕
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'btn-group';
+
+            node.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.innerText = option.text;
+                if (option.style === 'secondary') {
+                    btn.classList.add('secondary');
+                }
+                
+                btn.onclick = () => {
+                    renderNode(option.next);
+                };
+                btnGroup.appendChild(btn);
+            });
+
+            card.appendChild(btnGroup);
+        }
+
+        // 啟動遊戲
+        renderNode('intro');
+
+    </script>
+</body>
+</html>
