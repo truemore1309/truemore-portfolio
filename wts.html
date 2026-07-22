@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>WTS — What The Sound</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;
+    --fg:#39ff14;
+    --fg-dim:#1c7a0a;
+    --fg-faint:#0d3d05;
+    --amber:#ffb000;
+    --danger:#ff3b30;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;width:100%;min-height:100%;
+    background:var(--bg);color:var(--fg);
+    font-family:'VT323','Courier New',monospace;
+    font-size:22px;
+    -webkit-font-smoothing:none;
+  }
+  a{color:inherit}
+
+  /* CRT scanline + vignette overlay (static — no blend-mode/animation to keep mobile GPUs happy) */
+  #crt{
+    position:fixed;inset:0;pointer-events:none;z-index:50;
+    background:
+      repeating-linear-gradient(to bottom, rgba(0,0,0,0.2) 0px, rgba(0,0,0,0.2) 1px, transparent 2px, transparent 4px),
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.5) 100%);
+  }
+
+  .home-btn{
+    position:fixed;top:16px;left:16px;z-index:100;
+    padding:6px 14px;
+    background:#000;
+    border:1px solid var(--fg-dim);
+    color:var(--fg-dim);
+    text-decoration:none;
+    font-size:20px;
+    letter-spacing:.05em;
+    transition:all .15s;
+  }
+  .home-btn:hover{border-color:var(--fg);color:var(--fg);box-shadow:0 0 8px var(--fg-dim)}
+
+  .wrap{
+    max-width:900px;margin:0 auto;
+    padding:70px 20px 40px;
+    min-height:100vh;
+    display:flex;flex-direction:column;
+  }
+
+  .title-bar{
+    text-align:center;
+    color:var(--fg-dim);
+    font-size:18px;
+    letter-spacing:.15em;
+    border-bottom:1px solid var(--fg-faint);
+    padding-bottom:8px;
+    margin-bottom:18px;
+    text-transform:uppercase;
+  }
+
+  .dice-panel{
+    border:1px solid var(--fg-faint);
+    padding:12px 10px 14px;
+    text-align:center;
+    margin-bottom:18px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .dice-panel:hover{border-color:var(--fg-dim)}
+  .dice-label{
+    color:var(--fg-dim);
+    font-size:14px;
+    letter-spacing:.15em;
+    margin-bottom:6px;
+    text-transform:uppercase;
+  }
+  .dice-face{
+    display:inline-block;
+    margin:0;
+    font-family:'VT323','Courier New',monospace;
+    font-size:20px;
+    line-height:1.15;
+    color:var(--fg);
+    text-shadow:0 0 6px var(--fg);
+  }
+  .dice-face.rolling{animation:diceshake .12s linear infinite}
+  @keyframes diceshake{
+    0%{transform:translate(0,0) rotate(0deg)}
+    25%{transform:translate(-1px,1px) rotate(-2deg)}
+    50%{transform:translate(1px,-1px) rotate(2deg)}
+    75%{transform:translate(-1px,-1px) rotate(-1deg)}
+    100%{transform:translate(0,0) rotate(0deg)}
+  }
+
+  .mic-panel{
+    border:1px solid var(--fg-dim);
+    padding:16px 18px;
+    margin-bottom:20px;
+  }
+  .mic-header{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    margin-bottom:8px;
+  }
+  .mic-title{color:var(--fg-dim);font-size:16px;letter-spacing:.1em;text-transform:uppercase}
+  #mic-status{color:var(--fg)}
+  .mic-readout{
+    text-align:center;
+    font-size:28px;
+    letter-spacing:.05em;
+    min-height:1.3em;
+    text-shadow:0 0 6px var(--fg);
+  }
+  .mic-bar{
+    text-align:center;
+    font-size:20px;
+    color:var(--fg-dim);
+    min-height:1.3em;
+    white-space:pre;
+  }
+  .mic-hint{
+    text-align:center;
+    color:var(--fg-faint);
+    font-size:13px;
+    letter-spacing:.05em;
+    margin-top:6px;
+  }
+
+  .screen{
+    border:1px solid var(--fg-dim);
+    box-shadow:0 0 20px rgba(57,255,20,0.15) inset;
+    padding:24px 20px;
+    text-align:center;
+    margin-bottom:20px;
+    min-height:180px;
+    display:flex;flex-direction:column;justify-content:center;
+    position:relative;
+  }
+
+  #chord-display{
+    font-size:clamp(56px,14vw,96px);
+    line-height:1;
+    text-shadow:0 0 8px var(--fg),0 0 20px rgba(57,255,20,0.5);
+    letter-spacing:.02em;
+    min-height:1.1em;
+  }
+  #chord-display.blink::after{content:'_';animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  #chord-detail{
+    color:var(--fg-dim);
+    font-size:18px;
+    letter-spacing:.08em;
+    margin-top:8px;
+    min-height:1.4em;
+  }
+
+  #boot-log{
+    border:1px solid var(--fg-faint);
+    height:150px;
+    overflow-y:auto;
+    padding:10px 12px;
+    font-size:17px;
+    color:var(--fg-dim);
+    margin-bottom:24px;
+    line-height:1.5;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  #boot-log .line{opacity:0;animation:fadein .15s forwards}
+  @keyframes fadein{to{opacity:1}}
+  #boot-log .hl{color:var(--fg)}
+
+  .octave-block{margin-bottom:18px}
+  .octave-label{
+    color:var(--fg-dim);
+    font-size:16px;
+    letter-spacing:.15em;
+    margin-bottom:6px;
+    text-transform:uppercase;
+  }
+  .note-grid{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:4px;
+  }
+  .note-btn{
+    background:#000;
+    border:1px solid var(--fg-dim);
+    color:var(--fg-dim);
+    font-family:inherit;
+    font-size:18px;
+    padding:12px 2px;
+    cursor:pointer;
+    transition:all .08s;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .note-btn.sharp{border-style:dashed;color:var(--fg-faint);border-color:var(--fg-faint)}
+  .note-btn:hover{border-color:var(--fg);color:var(--fg)}
+  .note-btn.active{
+    background:var(--fg);
+    color:#000;
+    border-color:var(--fg);
+    box-shadow:0 0 12px var(--fg);
+  }
+
+  .controls{
+    display:flex;gap:10px;justify-content:center;margin-top:6px;flex-wrap:wrap;
+  }
+  .ctl-btn{
+    background:#000;
+    border:1px solid var(--fg-dim);
+    color:var(--fg-dim);
+    font-family:inherit;
+    font-size:18px;
+    padding:8px 20px;
+    cursor:pointer;
+    letter-spacing:.1em;
+  }
+  .ctl-btn:hover{border-color:var(--fg);color:var(--fg)}
+  .ctl-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+
+  .footer-hint{
+    margin-top:auto;
+    padding-top:24px;
+    text-align:center;
+    color:var(--fg-faint);
+    font-size:16px;
+    letter-spacing:.1em;
+  }
+
+  @media (max-width:560px){
+    body{font-size:19px}
+    .note-grid{grid-template-columns:repeat(6,1fr)}
+    #chord-display{font-size:clamp(44px,16vw,72px)}
+  }
+</style>
+</head>
+<body>
+
+<div id="crt"></div>
+<a href="index.html" class="home-btn">[ESC] BACK TO TRUEMORE</a>
+
+<div class="wrap">
+  <div class="title-bar">C:\WTS&gt; RUN CHORD.EXE — WHAT THE SOUND v1.0</div>
+
+  <div class="dice-panel" id="dice-panel">
+    <div class="dice-label">DICE.SYS — <span id="dice-hint">CLICK TO ROLL</span></div>
+    <pre class="dice-face" id="dice-face"></pre>
+  </div>
+
+  <div class="screen">
+    <div id="chord-display" class="blink">READY</div>
+    <div id="chord-detail">選擇下方音符以偵測和弦 / CLICK NOTES BELOW TO DETECT CHORD</div>
+  </div>
+
+  <div class="mic-panel">
+    <div class="mic-header">
+      <span class="mic-title">MIC.SYS — <span id="mic-status">STANDBY</span></span>
+      <button class="ctl-btn" id="mic-btn">[ENABLE MIC]</button>
+    </div>
+    <div id="mic-readout" class="mic-readout">MIC OFFLINE</div>
+    <div id="mic-bar" class="mic-bar"></div>
+    <div class="mic-hint">對麥克風唱/彈一個穩定的音，持續約 0.3 秒會自動加入下方和弦 / HOLD A STEADY NOTE TO ADD IT TO THE CHORD</div>
+  </div>
+
+  <div id="boot-log"></div>
+
+  <div class="octave-block" id="octave-3"></div>
+  <div class="octave-block" id="octave-4"></div>
+
+  <div class="controls">
+    <button class="ctl-btn danger" id="clear-btn">[CLEAR BUFFER]</button>
+  </div>
+
+  <div class="footer-hint">TAP NOTES TO TOGGLE · CHORD AUTO-DETECTED FROM LOWEST NOTE</div>
+</div>
+
+<script>
+(function(){
+  const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  const BASE_MIDI = 48; // C3
+  const TOTAL_NOTES = 24; // two octaves
+
+  // interval set (sorted, comma-joined, relative to candidate root) -> chord quality suffix
+  const CHORD_DICT = {
+    "0,7":"5",
+    "0,4":"(no5)",
+    "0,3":"m(no5)",
+    "0,4,7":"",
+    "0,3,7":"m",
+    "0,3,6":"dim",
+    "0,4,8":"aug",
+    "0,5,7":"sus4",
+    "0,2,7":"sus2",
+    "0,4,7,11":"maj7",
+    "0,4,7,10":"7",
+    "0,3,7,10":"m7",
+    "0,3,6,9":"dim7",
+    "0,3,6,10":"m7b5",
+    "0,4,7,9":"6",
+    "0,3,7,9":"m6",
+    "0,2,4,7,11":"maj9",
+    "0,2,4,7,10":"9",
+    "0,2,3,7,10":"m9"
+  };
+
+  const selected = new Set();
+  const chordDisplay = document.getElementById('chord-display');
+  const chordDetail = document.getElementById('chord-detail');
+  const bootLog = document.getElementById('boot-log');
+
+  function midiToFreq(midi){ return 440 * Math.pow(2, (midi - 69) / 12); }
+  function freqToMidi(freq){ return 69 + 12 * Math.log2(freq / 440); }
+  function noteName(idx){ return NOTE_NAMES[idx % 12]; }
+  function noteFullName(idx){ return NOTE_NAMES[idx % 12] + (3 + Math.floor(idx / 12)); }
+
+  // ---- Audio ----
+  let audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      log('AUDIO ENGINE... ONLINE', true);
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function playTone(freq, duration, peakGain){
+    ensureAudio();
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(peakGain, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.02);
+  }
+  function beep(idx){
+    const midi = BASE_MIDI + idx;
+    const freq = midiToFreq(midi);
+    playTone(freq, 0.4, 0.15);
+    return freq;
+  }
+
+  // ---- Log ----
+  function log(msg, hl){
+    const line = document.createElement('div');
+    line.className = 'line' + (hl ? ' hl' : '');
+    line.textContent = '> ' + msg;
+    bootLog.appendChild(line);
+    bootLog.scrollTop = bootLog.scrollHeight;
+    while(bootLog.children.length > 60){ bootLog.removeChild(bootLog.firstChild); }
+  }
+
+  // ---- Chord analysis ----
+  function analyzeChord(indices){
+    if(indices.length === 0) return null;
+    const sorted = [...indices].sort((a,b)=>a-b);
+    if(sorted.length === 1){
+      return { text: noteFullName(sorted[0]), detail: 'SINGLE NOTE' };
+    }
+    const bassPc = sorted[0] % 12;
+    const pcSet = [...new Set(sorted.map(n => n % 12))];
+    const candidates = [bassPc, ...pcSet.filter(pc => pc !== bassPc)];
+    for(const root of candidates){
+      const intervals = [...new Set(pcSet.map(pc => (pc - root + 12) % 12))].sort((a,b)=>a-b);
+      const key = intervals.join(',');
+      if(Object.prototype.hasOwnProperty.call(CHORD_DICT, key)){
+        const quality = CHORD_DICT[key];
+        const rootName = NOTE_NAMES[root];
+        if(root === bassPc){
+          return { text: rootName + quality, detail: 'ROOT POSITION · NOTES: ' + sorted.map(noteFullName).join(' ') };
+        }
+        const bassName = NOTE_NAMES[bassPc];
+        return { text: rootName + quality + '/' + bassName, detail: 'INVERSION · NOTES: ' + sorted.map(noteFullName).join(' ') };
+      }
+    }
+    return { text: NOTE_NAMES[bassPc] + '(?)', detail: 'UNRECOGNIZED — ' + pcSet.length + ' TONES · NOTES: ' + sorted.map(noteFullName).join(' ') };
+  }
+
+  let lastChordText = null;
+  function updateDisplay(){
+    const result = analyzeChord([...selected]);
+    if(!result){
+      chordDisplay.textContent = 'READY';
+      chordDisplay.classList.add('blink');
+      chordDetail.textContent = '選擇下方音符以偵測和弦 / CLICK NOTES BELOW TO DETECT CHORD';
+      lastChordText = null;
+      return;
+    }
+    chordDisplay.classList.remove('blink');
+    chordDisplay.textContent = result.text;
+    chordDetail.textContent = result.detail;
+    if(result.text !== lastChordText && selected.size >= 2){
+      log('CHORD RESOLVED: ' + result.text + ' (' + result.detail.split(' · ')[0] + ')', true);
+    }
+    lastChordText = result.text;
+  }
+
+  // ---- Build note grid ----
+  function buildOctave(container, offset, label){
+    const wrap = document.createElement('div');
+    const lbl = document.createElement('div');
+    lbl.className = 'octave-label';
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+
+    const grid = document.createElement('div');
+    grid.className = 'note-grid';
+    for(let i = 0; i < 12; i++){
+      const idx = offset + i;
+      const btn = document.createElement('button');
+      btn.className = 'note-btn' + (NOTE_NAMES[i].includes('#') ? ' sharp' : '');
+      btn.textContent = NOTE_NAMES[i];
+      btn.dataset.index = idx;
+      btn.addEventListener('click', () => toggleNote(idx, btn));
+      grid.appendChild(btn);
+    }
+    wrap.appendChild(grid);
+    container.appendChild(wrap);
+  }
+
+  function toggleNote(idx, btn){
+    if(selected.has(idx)){
+      selected.delete(idx);
+      btn.classList.remove('active');
+      log('KEY ' + noteFullName(idx) + ' UP');
+    } else {
+      selected.add(idx);
+      btn.classList.add('active');
+      const freq = beep(idx);
+      log('KEY ' + noteFullName(idx) + ' DOWN [' + freq.toFixed(1) + 'Hz]');
+    }
+    updateDisplay();
+  }
+
+  buildOctave(document.getElementById('octave-3'), 0, 'OCTAVE 3');
+  buildOctave(document.getElementById('octave-4'), 12, 'OCTAVE 4');
+
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    selected.clear();
+    document.querySelectorAll('.note-btn.active').forEach(b => b.classList.remove('active'));
+    updateDisplay();
+    log('BUFFER CLEARED', true);
+  });
+
+  // ---- Mic pitch detection ----
+  // Autocorrelation (ACF) over the mic's time-domain buffer: finds the lag that
+  // best repeats the waveform, refines it with parabolic interpolation, and
+  // returns a clarity score (0-1) so a noisy/silent signal can be rejected.
+  function autoCorrelate(buf, sampleRate){
+    const SIZE = buf.length;
+    let acf0 = 0;
+    for(let i = 0; i < SIZE; i++) acf0 += buf[i] * buf[i];
+    acf0 /= SIZE;
+    if(Math.sqrt(acf0) < 0.01) return null; // effectively silent
+
+    const maxLag = Math.min(SIZE - 1, Math.floor(sampleRate / 80));   // ~80Hz floor
+    const minLag = Math.max(2, Math.floor(sampleRate / 1200));        // ~1200Hz ceiling
+
+    const corr = new Float32Array(maxLag - minLag + 1);
+    let globalMax = -Infinity;
+    for(let lag = minLag; lag <= maxLag; lag++){
+      let sum = 0;
+      for(let i = 0; i < SIZE - lag; i++) sum += buf[i] * buf[i + lag];
+      sum /= (SIZE - lag);
+      corr[lag - minLag] = sum;
+      if(sum > globalMax) globalMax = sum;
+    }
+
+    // A harmonic tone's ACF peaks at every multiple of the true period, so the
+    // raw global max often lands on a subharmonic (octave error). Taking the
+    // *earliest* strong peak instead reliably lands on the true fundamental.
+    let bestIdx = -1;
+    for(let i = 1; i < corr.length - 1; i++){
+      if(corr[i] >= globalMax * 0.85 && corr[i] >= corr[i - 1] && corr[i] >= corr[i + 1]){
+        bestIdx = i;
+        break;
+      }
+    }
+    if(bestIdx === -1) bestIdx = corr.indexOf(globalMax);
+    if(bestIdx <= 0 || bestIdx >= corr.length - 1){
+      const bestLag = minLag + Math.max(bestIdx, 0);
+      return { freq: sampleRate / bestLag, clarity: globalMax / acf0 };
+    }
+
+    const cPrev = corr[bestIdx - 1], cHere = corr[bestIdx], cNext = corr[bestIdx + 1];
+    const denom = (cPrev - 2 * cHere + cNext);
+    const shift = denom !== 0 ? 0.5 * (cPrev - cNext) / denom : 0;
+    const refinedLag = (minLag + bestIdx) + shift;
+
+    return { freq: sampleRate / refinedLag, clarity: cHere / acf0 };
+  }
+
+  function centsBar(cents){
+    const width = 21;
+    const center = Math.floor(width / 2);
+    const clamped = Math.max(-50, Math.min(50, cents));
+    const pos = Math.round((clamped + 50) / 100 * (width - 1));
+    let bar = '';
+    for(let i = 0; i < width; i++){
+      bar += (i === pos) ? '●' : (i === center ? '│' : '─');
+    }
+    return '♭' + bar + '♯';
+  }
+
+  const micBtn = document.getElementById('mic-btn');
+  const micStatus = document.getElementById('mic-status');
+  const micReadout = document.getElementById('mic-readout');
+  const micBar = document.getElementById('mic-bar');
+
+  let micStream = null, micSourceNode = null, micAnalyser = null, micIntervalId = null, micActive = false;
+  let micLastMidi = null, micStableSince = 0, micLatchedMidi = null;
+
+  const CLARITY_THRESHOLD = 0.9; // empirically-tunable: raise to reject more noise, lower if real notes get ignored
+
+  function micAnalyzeTick(){
+    const buf = new Float32Array(micAnalyser.fftSize);
+    micAnalyser.getFloatTimeDomainData(buf);
+    const result = autoCorrelate(buf, audioCtx.sampleRate);
+
+    if(!result || result.clarity < CLARITY_THRESHOLD || result.freq < 70 || result.freq > 1500){
+      micReadout.textContent = 'LISTENING...';
+      micBar.textContent = '';
+      micLastMidi = null;
+      micLatchedMidi = null;
+      return;
+    }
+
+    const midiFloat = freqToMidi(result.freq);
+    const midiRounded = Math.round(midiFloat);
+    const cents = Math.round((midiFloat - midiRounded) * 100);
+    const noteText = NOTE_NAMES[((midiRounded % 12) + 12) % 12] + (Math.floor(midiRounded / 12) - 1);
+
+    micReadout.textContent = noteText + '   ' + (cents >= 0 ? '+' : '') + cents + '¢   ' + result.freq.toFixed(1) + 'Hz';
+    micBar.textContent = centsBar(cents);
+
+    if(midiRounded === micLastMidi){
+      if(micLatchedMidi !== midiRounded && Date.now() - micStableSince > 350){
+        const idx = midiRounded - BASE_MIDI;
+        if(idx >= 0 && idx < TOTAL_NOTES && !selected.has(idx)){
+          selected.add(idx);
+          const btn = document.querySelector('.note-btn[data-index="' + idx + '"]');
+          if(btn) btn.classList.add('active');
+          updateDisplay();
+          log('MIC ADDED: ' + noteFullName(idx), true);
+        }
+        micLatchedMidi = midiRounded;
+      }
+    } else {
+      micLastMidi = midiRounded;
+      micStableSince = Date.now();
+      micLatchedMidi = null;
+    }
+  }
+
+  async function enableMic(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      micStatus.textContent = 'ERR: NOT SUPPORTED';
+      log('MIC ERROR: getUserMedia NOT SUPPORTED (NEEDS HTTPS)', true);
+      return;
+    }
+    try{
+      ensureAudio();
+      micStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+      });
+      micSourceNode = audioCtx.createMediaStreamSource(micStream);
+      micAnalyser = audioCtx.createAnalyser();
+      micAnalyser.fftSize = 2048;
+      micSourceNode.connect(micAnalyser); // NOT connected to destination — avoids feeding mic back to speakers
+      micActive = true;
+      micBtn.textContent = '[DISABLE MIC]';
+      micStatus.textContent = 'ONLINE';
+      micReadout.textContent = 'LISTENING...';
+      log('MIC ENGINE... ONLINE', true);
+      micIntervalId = setInterval(micAnalyzeTick, 50);
+    } catch(err){
+      micStatus.textContent = 'ERR: ' + err.name;
+      micReadout.textContent = 'MIC UNAVAILABLE';
+      log('MIC ERROR: ' + err.name, true);
+    }
+  }
+
+  function disableMic(){
+    if(micIntervalId) clearInterval(micIntervalId);
+    micIntervalId = null;
+    if(micSourceNode) micSourceNode.disconnect();
+    if(micStream) micStream.getTracks().forEach(t => t.stop());
+    micStream = null; micSourceNode = null; micAnalyser = null;
+    micActive = false;
+    micBtn.textContent = '[ENABLE MIC]';
+    micStatus.textContent = 'STANDBY';
+    micReadout.textContent = 'MIC OFFLINE';
+    micBar.textContent = '';
+    log('MIC ENGINE... OFFLINE', true);
+  }
+
+  micBtn.addEventListener('click', () => { micActive ? disableMic() : enableMic(); });
+
+  // ---- ASCII dice ----
+  const FACES = [
+`┌───────┐
+│       │
+│   ●   │
+│       │
+└───────┘`,
+`┌───────┐
+│     ● │
+│       │
+│ ●     │
+└───────┘`,
+`┌───────┐
+│     ● │
+│   ●   │
+│ ●     │
+└───────┘`,
+`┌───────┐
+│ ●   ● │
+│       │
+│ ●   ● │
+└───────┘`,
+`┌───────┐
+│ ●   ● │
+│   ●   │
+│ ●   ● │
+└───────┘`,
+`┌───────┐
+│ ●   ● │
+│ ●   ● │
+│ ●   ● │
+└───────┘`
+  ];
+
+  const diceFace = document.getElementById('dice-face');
+  const dicePanel = document.getElementById('dice-panel');
+  const diceHint = document.getElementById('dice-hint');
+  let diceRolling = false;
+
+  function renderFace(n){ diceFace.textContent = FACES[n - 1]; }
+  renderFace(1);
+
+  function rollDice(){
+    if(diceRolling) return;
+    diceRolling = true;
+    diceFace.classList.add('rolling');
+    diceHint.textContent = 'ROLLING...';
+    playTone(320, 0.05, 0.1);
+
+    let ticks = 0;
+    const totalTicks = 14;
+    function tick(){
+      renderFace(1 + Math.floor(Math.random() * 6));
+      ticks++;
+      if(ticks < totalTicks){
+        setTimeout(tick, 40 + ticks * 8);
+      } else {
+        const result = 1 + Math.floor(Math.random() * 6);
+        renderFace(result);
+        diceFace.classList.remove('rolling');
+        diceHint.textContent = 'CLICK TO ROLL';
+        diceRolling = false;
+        playTone(140, 0.15, 0.15);
+        log('DICE ROLLED: ' + result, true);
+      }
+    }
+    tick();
+  }
+
+  dicePanel.addEventListener('click', rollDice);
+
+  // Boot sequence
+  log('WTS-BIOS (C) 2026 TRUEMORE');
+  log('MEMORY TEST... 24 NOTES OK');
+  log('CHORD ENGINE... LOADED');
+  log('AUDIO ENGINE... STANDBY (TAP A NOTE TO INIT)');
+})();
+</script>
+</body>
+</html>
