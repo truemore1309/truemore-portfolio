@@ -274,6 +274,75 @@
   }
   .chord-play-btn:hover{border-color:var(--fg);color:var(--fg)}
 
+  .seq-panel{
+    border:1px solid var(--fg-dim);
+    padding:16px 18px;
+    margin-bottom:20px;
+  }
+  .seq-transport{
+    display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .seq-transport label, .seq-params label{
+    color:var(--fg-dim);font-size:15px;letter-spacing:.08em;display:flex;align-items:center;gap:6px;
+  }
+  .seq-num-input{
+    width:64px;
+    background:#000;
+    border:1px solid var(--fg-dim);
+    color:var(--fg);
+    font-family:inherit;
+    font-size:18px;
+    padding:4px 6px;
+    text-align:center;
+  }
+  .seq-num-input:focus{outline:none;border-color:var(--fg)}
+
+  .seq-track{
+    display:flex;gap:6px;overflow-x:auto;
+    padding:10px 4px;
+    margin-bottom:16px;
+    min-height:70px;
+    border:1px dashed var(--fg-faint);
+  }
+  .seq-empty{
+    margin:auto;
+    color:var(--fg-faint);
+    font-size:14px;
+    letter-spacing:.08em;
+  }
+  .seq-step{
+    position:relative;
+    flex:0 0 auto;
+    min-width:78px;
+    border:1px solid var(--fg-faint);
+    padding:8px 18px 8px 8px;
+    text-align:center;
+  }
+  .seq-step.active{border-color:var(--fg);box-shadow:0 0 10px rgba(57,255,20,.35);background:rgba(57,255,20,.08)}
+  .seq-step-chord{font-size:19px;text-shadow:0 0 5px var(--fg)}
+  .seq-step-meta{font-size:12px;color:var(--fg-dim);margin-top:3px;white-space:nowrap}
+  .seq-step-remove{
+    position:absolute;top:2px;right:4px;
+    background:none;border:none;color:var(--fg-faint);
+    font-size:14px;cursor:pointer;line-height:1;padding:2px;
+    font-family:inherit;
+  }
+  .seq-step-remove:hover{color:var(--danger)}
+
+  .seq-quality-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(64px,1fr));
+    gap:4px;
+    margin:10px 0;
+  }
+  .seq-quality-btn{padding:6px 4px;font-size:14px}
+
+  .seq-params{
+    display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;
+    margin-top:10px;
+  }
+
   .footer-hint{
     margin-top:auto;
     padding-top:24px;
@@ -329,6 +398,27 @@
     <div class="key-chords" id="key-chords"></div>
   </div>
 
+  <div class="seq-panel">
+    <div class="key-label">SEQ.SYS — CHORD LOOPER</div>
+
+    <div class="seq-transport">
+      <label>BPM <input type="number" id="seq-bpm" class="seq-num-input" value="90" min="20" max="300"></label>
+      <button class="ctl-btn" id="seq-play-btn">[▶ PLAY]</button>
+    </div>
+
+    <div class="seq-track" id="seq-track"></div>
+
+    <div class="seq-builder">
+      <div class="note-grid" id="seq-root-grid"></div>
+      <div class="seq-quality-grid" id="seq-quality-grid"></div>
+      <div class="seq-params">
+        <label>BEATS <input type="number" id="seq-beats" class="seq-num-input" value="4" min="1" max="32"></label>
+        <label>HITS <input type="number" id="seq-hits" class="seq-num-input" value="1" min="1" max="8"></label>
+        <button class="ctl-btn" id="seq-add-btn">[+ ADD TO TRACK]</button>
+      </div>
+    </div>
+  </div>
+
   <div class="dice-panel" id="dice-panel">
     <div class="dice-label">DICE.SYS — <span id="dice-hint">CLICK TO ROLL</span></div>
     <pre class="dice-face" id="dice-face"></pre>
@@ -363,7 +453,8 @@
     "0,3,7,9":"m6",
     "0,2,4,7,11":"maj9",
     "0,2,4,7,10":"9",
-    "0,2,3,7,10":"m9"
+    "0,2,3,7,10":"m9",
+    "0,2,5,7,10":"9sus4"
   };
 
   const selected = new Set();
@@ -695,14 +786,20 @@
     return chords;
   }
 
-  function playChord(pcs){
-    let prev = BASE_MIDI - 1;
+  function voiceChordMidis(pcs, baseMidi){
+    const midis = [];
+    let prev = baseMidi - 1;
     pcs.forEach(pc => {
       let midi = prev + 1;
       while(((midi % 12) + 12) % 12 !== pc) midi++;
-      playTone(midiToFreq(midi), 0.6, 0.09);
+      midis.push(midi);
       prev = midi;
     });
+    return midis;
+  }
+
+  function playChord(pcs){
+    voiceChordMidis(pcs, BASE_MIDI).forEach(midi => playTone(midiToFreq(midi), 0.6, 0.09));
   }
 
   const keyRootGrid = document.getElementById('key-root-grid');
@@ -762,6 +859,178 @@
   }
 
   renderKeyChords();
+
+  // ---- SEQ.SYS: chord progression looper ----
+  const QUALITY_LIST = ['', 'm', 'dim', 'aug', 'sus2', 'sus4', '6', 'm6', '7', 'maj7', 'm7', 'dim7', 'm7b5', '9', 'maj9', 'm9', '9sus4'];
+  const QUALITY_LABELS = {
+    '':'MAJ', 'm':'MIN', 'dim':'DIM', 'aug':'AUG', 'sus2':'SUS2', 'sus4':'SUS4',
+    '6':'6', 'm6':'M6', '7':'7', 'maj7':'MAJ7', 'm7':'M7', 'dim7':'DIM7', 'm7b5':'M7B5',
+    '9':'9', 'maj9':'MAJ9', 'm9':'M9', '9sus4':'9SUS4'
+  };
+  const QUALITY_INTERVALS = {};
+  Object.keys(CHORD_DICT).forEach(k => { QUALITY_INTERVALS[CHORD_DICT[k]] = k.split(',').map(Number); });
+
+  const seqSteps = []; // { root, quality, beats, hits }
+  let seqBuilderRoot = 0;
+  let seqBuilderQuality = '';
+  let seqPlaying = false;
+  let seqTimeoutIds = [];
+  let seqActiveOscillators = [];
+
+  const seqTrackEl = document.getElementById('seq-track');
+  const seqRootGrid = document.getElementById('seq-root-grid');
+  const seqQualityGrid = document.getElementById('seq-quality-grid');
+  const seqBeatsInput = document.getElementById('seq-beats');
+  const seqHitsInput = document.getElementById('seq-hits');
+  const seqBpmInput = document.getElementById('seq-bpm');
+  const seqPlayBtn = document.getElementById('seq-play-btn');
+
+  NOTE_NAMES.forEach((name, pc) => {
+    const btn = document.createElement('button');
+    btn.className = 'note-btn' + (name.includes('#') ? ' sharp' : '') + (pc === seqBuilderRoot ? ' active' : '');
+    btn.textContent = name;
+    btn.addEventListener('click', () => {
+      seqBuilderRoot = pc;
+      seqRootGrid.querySelectorAll('.note-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    seqRootGrid.appendChild(btn);
+  });
+
+  QUALITY_LIST.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl-btn seq-quality-btn' + (q === seqBuilderQuality ? ' active' : '');
+    btn.textContent = QUALITY_LABELS[q];
+    btn.addEventListener('click', () => {
+      seqBuilderQuality = q;
+      seqQualityGrid.querySelectorAll('.seq-quality-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    seqQualityGrid.appendChild(btn);
+  });
+
+  function renderTrack(){
+    seqTrackEl.innerHTML = '';
+    if(seqSteps.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'seq-empty';
+      empty.textContent = 'TRACK EMPTY — ADD A CHORD BELOW';
+      seqTrackEl.appendChild(empty);
+      return;
+    }
+    seqSteps.forEach((step, i) => {
+      const el = document.createElement('div');
+      el.className = 'seq-step';
+      el.dataset.index = i;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'seq-step-remove';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => { seqSteps.splice(i, 1); renderTrack(); });
+
+      const chordEl = document.createElement('div');
+      chordEl.className = 'seq-step-chord';
+      chordEl.textContent = NOTE_NAMES[step.root] + step.quality;
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'seq-step-meta';
+      metaEl.textContent = step.beats + ' beats · x' + step.hits;
+
+      el.appendChild(removeBtn);
+      el.appendChild(chordEl);
+      el.appendChild(metaEl);
+      seqTrackEl.appendChild(el);
+    });
+  }
+  renderTrack();
+
+  document.getElementById('seq-add-btn').addEventListener('click', () => {
+    const beats = Math.max(1, Math.min(32, parseInt(seqBeatsInput.value, 10) || 4));
+    const hits = Math.max(1, Math.min(8, parseInt(seqHitsInput.value, 10) || 1));
+    seqSteps.push({ root: seqBuilderRoot, quality: seqBuilderQuality, beats, hits });
+    renderTrack();
+    log('TRACK: ADDED ' + NOTE_NAMES[seqBuilderRoot] + seqBuilderQuality + ' (' + beats + 'b x' + hits + ')', true);
+  });
+
+  function seqScheduleTone(freq, startTime, duration, peakGain){
+    ensureAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+    seqActiveOscillators.push(osc);
+    osc.onended = () => { seqActiveOscillators = seqActiveOscillators.filter(o => o !== osc); };
+  }
+
+  function highlightSeqStep(index){
+    seqTrackEl.querySelectorAll('.seq-step').forEach(el => el.classList.remove('active'));
+    const el = seqTrackEl.querySelector('.seq-step[data-index="' + index + '"]');
+    if(el) el.classList.add('active');
+  }
+
+  // Schedules one full loop of the track using the Web Audio clock (not setTimeout) for
+  // the actual sound, so playback stays sample-accurate regardless of JS timer jitter.
+  // Re-arms itself via setTimeout to schedule the next loop just before this one ends.
+  function seqCycle(){
+    if(!seqPlaying || seqSteps.length === 0) return;
+    ensureAudio();
+    const bpm = Math.max(20, Math.min(300, parseInt(seqBpmInput.value, 10) || 90));
+    const beatSec = 60 / bpm;
+    const lookahead = 0.05;
+    const baseTime = audioCtx.currentTime + lookahead;
+
+    let cursorBeats = 0;
+    seqSteps.forEach((step, stepIndex) => {
+      const stepStartSec = cursorBeats * beatSec;
+      const stepDurSec = step.beats * beatSec;
+      const hitDurSec = stepDurSec / step.hits;
+      const intervals = QUALITY_INTERVALS[step.quality] || [0, 4, 7];
+      const pcs = intervals.map(iv => (step.root + iv) % 12);
+      const midis = voiceChordMidis(pcs, BASE_MIDI);
+
+      for(let h = 0; h < step.hits; h++){
+        const hitStartSec = stepStartSec + h * hitDurSec;
+        midis.forEach(midi => seqScheduleTone(midiToFreq(midi), baseTime + hitStartSec, hitDurSec * 0.9, 0.055));
+      }
+
+      const highlightId = setTimeout(() => highlightSeqStep(stepIndex), (lookahead + stepStartSec) * 1000);
+      seqTimeoutIds.push(highlightId);
+
+      cursorBeats += step.beats;
+    });
+
+    const totalSec = cursorBeats * beatSec;
+    const loopId = setTimeout(seqCycle, (lookahead + totalSec) * 1000);
+    seqTimeoutIds.push(loopId);
+  }
+
+  function startSequence(){
+    if(seqSteps.length === 0){ log('TRACK EMPTY — ADD A CHORD FIRST', true); return; }
+    seqPlaying = true;
+    seqPlayBtn.textContent = '[■ STOP]';
+    log('SEQ PLAYING @ ' + seqBpmInput.value + ' BPM', true);
+    seqCycle();
+  }
+
+  function stopSequence(){
+    seqPlaying = false;
+    seqTimeoutIds.forEach(id => clearTimeout(id));
+    seqTimeoutIds = [];
+    const now = audioCtx ? audioCtx.currentTime : 0;
+    seqActiveOscillators.forEach(osc => { try{ osc.stop(now); }catch(e){} });
+    seqActiveOscillators = [];
+    seqTrackEl.querySelectorAll('.seq-step').forEach(el => el.classList.remove('active'));
+    seqPlayBtn.textContent = '[▶ PLAY]';
+    log('SEQ STOPPED', true);
+  }
+
+  seqPlayBtn.addEventListener('click', () => { seqPlaying ? stopSequence() : startSequence(); });
 
   // ---- ASCII dice ----
   const FACES = [
