@@ -217,6 +217,62 @@
   }
   .ctl-btn:hover{border-color:var(--fg);color:var(--fg)}
   .ctl-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+  .ctl-btn.active{background:var(--fg);color:#000;border-color:var(--fg);box-shadow:0 0 10px var(--fg)}
+
+  .key-panel{
+    border:1px solid var(--fg-dim);
+    padding:16px 18px;
+    margin-bottom:20px;
+  }
+  .key-label{
+    color:var(--fg-dim);
+    font-size:16px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    margin-bottom:12px;
+    text-align:center;
+  }
+  .key-scale-toggle{
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+    margin:12px 0 16px;
+  }
+  .key-chords{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(78px,1fr));
+    gap:8px;
+  }
+  .chord-card{
+    border:1px solid var(--fg-faint);
+    padding:10px 6px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s;
+    user-select:none;
+  }
+  .chord-card:hover{border-color:var(--fg-dim)}
+  .chord-card.expanded{border-color:var(--fg);box-shadow:0 0 8px rgba(57,255,20,.2)}
+  .chord-roman{display:block;color:var(--fg-dim);font-size:15px;letter-spacing:.05em}
+  .chord-symbol{display:block;font-size:22px;text-shadow:0 0 5px var(--fg);margin-top:2px}
+  .chord-card-notes{
+    display:none;
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed var(--fg-faint);
+    font-size:14px;
+    color:var(--fg-dim);
+  }
+  .chord-card.expanded .chord-card-notes{display:block}
+  .chord-play-btn{
+    margin-top:6px;
+    font-size:13px;
+    font-family:inherit;
+    background:none;
+    border:1px solid var(--fg-dim);
+    color:var(--fg-dim);
+    padding:3px 10px;
+    cursor:pointer;
+  }
+  .chord-play-btn:hover{border-color:var(--fg);color:var(--fg)}
 
   .footer-hint{
     margin-top:auto;
@@ -261,6 +317,17 @@
   </div>
 
   <div class="footer-hint">TAP NOTES, OR SING/PLAY INTO MIC (HOLD ~0.3s) · CHORD AUTO-DETECTED FROM LOWEST NOTE</div>
+
+  <div class="key-panel">
+    <div class="key-label">KEY.SYS — SCALE EXPLORER</div>
+    <div class="note-grid" id="key-root-grid"></div>
+    <div class="key-scale-toggle" id="key-scale-toggle">
+      <button class="ctl-btn key-scale-btn" data-scale="Major">MAJOR</button>
+      <button class="ctl-btn key-scale-btn" data-scale="Natural Minor">MINOR</button>
+      <button class="ctl-btn key-scale-btn" data-scale="Harmonic Minor">HARM. MINOR</button>
+    </div>
+    <div class="key-chords" id="key-chords"></div>
+  </div>
 
   <div class="dice-panel" id="dice-panel">
     <div class="dice-label">DICE.SYS — <span id="dice-hint">CLICK TO ROLL</span></div>
@@ -594,6 +661,107 @@
   }
 
   micBtn.addEventListener('click', () => { micActive ? disableMic() : enableMic(); });
+
+  // ---- Key / scale explorer ----
+  const SCALES = {
+    'Major': [0,2,4,5,7,9,11],
+    'Natural Minor': [0,2,3,5,7,8,10],
+    'Harmonic Minor': [0,2,3,5,7,8,11]
+  };
+  const ROMAN_BASE = ['I','II','III','IV','V','VI','VII'];
+
+  let keyRootPc = 0;          // C
+  let keyScaleName = 'Major';
+
+  function romanFor(degree, quality){
+    const isMinorFamily = (quality === 'm' || quality === 'dim');
+    let numeral = isMinorFamily ? ROMAN_BASE[degree].toLowerCase() : ROMAN_BASE[degree];
+    if(quality === 'dim') numeral += '°';
+    if(quality === 'aug') numeral += '+';
+    return numeral;
+  }
+
+  function diatonicChords(rootPc, scaleName){
+    const scale = SCALES[scaleName];
+    const chords = [];
+    for(let degree = 0; degree < 7; degree++){
+      const pcs = [degree, (degree + 2) % 7, (degree + 4) % 7].map(i => (rootPc + scale[i]) % 12);
+      const chordRootPc = pcs[0];
+      const intervals = [...new Set(pcs.map(pc => (pc - chordRootPc + 12) % 12))].sort((a, b) => a - b);
+      const key = intervals.join(',');
+      const quality = Object.prototype.hasOwnProperty.call(CHORD_DICT, key) ? CHORD_DICT[key] : '?';
+      chords.push({ degree, roman: romanFor(degree, quality), symbol: NOTE_NAMES[chordRootPc] + quality, pcs });
+    }
+    return chords;
+  }
+
+  function playChord(pcs){
+    let prev = BASE_MIDI - 1;
+    pcs.forEach(pc => {
+      let midi = prev + 1;
+      while(((midi % 12) + 12) % 12 !== pc) midi++;
+      playTone(midiToFreq(midi), 0.6, 0.09);
+      prev = midi;
+    });
+  }
+
+  const keyRootGrid = document.getElementById('key-root-grid');
+  const keyScaleToggle = document.getElementById('key-scale-toggle');
+  const keyChordsEl = document.getElementById('key-chords');
+
+  NOTE_NAMES.forEach((name, pc) => {
+    const btn = document.createElement('button');
+    btn.className = 'note-btn' + (name.includes('#') ? ' sharp' : '') + (pc === keyRootPc ? ' active' : '');
+    btn.textContent = name;
+    btn.addEventListener('click', () => {
+      keyRootPc = pc;
+      keyRootGrid.querySelectorAll('.note-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderKeyChords();
+      log('KEY SET: ' + NOTE_NAMES[keyRootPc] + ' ' + keyScaleName.toUpperCase());
+    });
+    keyRootGrid.appendChild(btn);
+  });
+
+  keyScaleToggle.querySelectorAll('.key-scale-btn').forEach(btn => {
+    if(btn.dataset.scale === keyScaleName) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      keyScaleName = btn.dataset.scale;
+      keyScaleToggle.querySelectorAll('.key-scale-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderKeyChords();
+      log('KEY SET: ' + NOTE_NAMES[keyRootPc] + ' ' + keyScaleName.toUpperCase());
+    });
+  });
+
+  function renderKeyChords(){
+    keyChordsEl.innerHTML = '';
+    diatonicChords(keyRootPc, keyScaleName).forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'chord-card';
+
+      const head = document.createElement('div');
+      head.innerHTML = '<span class="chord-roman">' + c.roman + '</span><span class="chord-symbol">' + c.symbol + '</span>';
+      card.appendChild(head);
+
+      const notesEl = document.createElement('div');
+      notesEl.className = 'chord-card-notes';
+      notesEl.textContent = c.pcs.map(pc => NOTE_NAMES[pc]).join(' · ');
+
+      const playBtn = document.createElement('button');
+      playBtn.className = 'chord-play-btn';
+      playBtn.textContent = '▶ PLAY';
+      playBtn.addEventListener('click', e => { e.stopPropagation(); playChord(c.pcs); });
+      notesEl.appendChild(document.createElement('br'));
+      notesEl.appendChild(playBtn);
+      card.appendChild(notesEl);
+
+      card.addEventListener('click', () => card.classList.toggle('expanded'));
+      keyChordsEl.appendChild(card);
+    });
+  }
+
+  renderKeyChords();
 
   // ---- ASCII dice ----
   const FACES = [
