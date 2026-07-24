@@ -298,37 +298,106 @@
   }
   .seq-num-input:focus{outline:none;border-color:var(--fg)}
 
-  .seq-track{
-    display:flex;gap:6px;overflow-x:auto;
-    padding:10px 4px;
+  .seq-timeline-wrap{
+    position:relative;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:22px 10px 16px;
     margin-bottom:16px;
-    min-height:70px;
     border:1px dashed var(--fg-faint);
+    -webkit-overflow-scrolling:touch;
+  }
+  .seq-ruler{
+    position:relative;
+    height:16px;
+    margin-bottom:6px;
+  }
+  .seq-ruler-tick{
+    position:absolute;
+    bottom:0;
+    width:1px;
+    height:6px;
+    background:var(--fg-faint);
+  }
+  .seq-ruler-tick.major{height:10px;background:var(--fg-dim)}
+  .seq-ruler-num{
+    position:absolute;
+    top:0;
+    font-size:11px;
+    color:var(--fg-faint);
+    transform:translateX(3px);
+    white-space:nowrap;
+  }
+  /* fixed-length grid: background lines are hardcoded to SEQ_PX_PER_BEAT(26px)/bar(104px) — keep in sync with the JS constant */
+  .seq-track{
+    position:relative;
+    height:52px;
+    border:1px solid var(--fg-faint);
+    background-image:
+      repeating-linear-gradient(to right, rgba(57,255,20,.28) 0, rgba(57,255,20,.28) 1px, transparent 1px, transparent 104px),
+      repeating-linear-gradient(to right, rgba(57,255,20,.1) 0, rgba(57,255,20,.1) 1px, transparent 1px, transparent 26px);
   }
   .seq-empty{
-    margin:auto;
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
     color:var(--fg-faint);
     font-size:14px;
     letter-spacing:.08em;
+    white-space:nowrap;
+    pointer-events:none;
   }
-  .seq-step{
-    position:relative;
+  .seq-playhead{
+    position:absolute;
+    top:20px;bottom:16px;
+    width:2px;
+    background:var(--fg);
+    box-shadow:0 0 8px var(--fg),0 0 2px var(--fg);
+    pointer-events:none;
+    display:none;
+    left:0;
+  }
+  .seq-clip{
+    position:absolute;
+    top:4px;
+    height:44px;
+    display:flex;
+    flex-direction:column;
+    border:1px solid var(--fg-dim);
+    background:rgba(57,255,20,.07);
+    touch-action:none;
+    cursor:grab;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .seq-clip.active{border-color:var(--fg);box-shadow:0 0 10px rgba(57,255,20,.4);background:rgba(57,255,20,.18)}
+  .seq-clip.seq-clip-dragging{cursor:grabbing;opacity:.9;box-shadow:0 6px 18px rgba(0,0,0,.6);z-index:200}
+  .seq-clip-label{
     flex:0 0 auto;
-    min-width:78px;
-    border:1px solid var(--fg-faint);
-    padding:8px 18px 8px 8px;
+    font-size:14px;
     text-align:center;
+    padding:3px 11px 1px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-shadow:0 0 4px var(--fg);
   }
-  .seq-step.active{border-color:var(--fg);box-shadow:0 0 10px rgba(57,255,20,.35);background:rgba(57,255,20,.08)}
-  .seq-step-chord{font-size:19px;text-shadow:0 0 5px var(--fg)}
-  .seq-step-meta{font-size:12px;color:var(--fg-dim);margin-top:3px;white-space:nowrap}
-  .seq-step-remove{
-    position:absolute;top:2px;right:4px;
-    background:none;border:none;color:var(--fg-faint);
-    font-size:14px;cursor:pointer;line-height:1;padding:2px;
+  .seq-clip-hits{flex:1 1 auto;display:flex}
+  .seq-clip-hit{flex:1 1 0;border-right:1px solid rgba(57,255,20,.2)}
+  .seq-clip-hit:last-child{border-right:none}
+  .seq-clip-remove{
+    position:absolute;top:-1px;right:-1px;
+    background:#000;border:none;color:var(--fg-faint);
+    font-size:13px;cursor:pointer;line-height:1;padding:2px 4px;
     font-family:inherit;
   }
-  .seq-step-remove:hover{color:var(--danger)}
+  .seq-clip-remove:hover{color:var(--danger)}
+  .seq-clip-handle{
+    position:absolute;top:0;bottom:0;width:10px;
+    cursor:ew-resize;touch-action:none;
+  }
+  .seq-clip-handle.left{left:-1px}
+  .seq-clip-handle.right{right:-1px}
+  .seq-clip-handle:hover,.seq-clip-handle.seq-handle-active{background:rgba(57,255,20,.35)}
 
   .seq-quality-grid{
     display:grid;
@@ -403,10 +472,15 @@
 
     <div class="seq-transport">
       <label>BPM <input type="number" id="seq-bpm" class="seq-num-input" value="90" min="20" max="300"></label>
+      <label>LENGTH (BARS) <input type="number" id="seq-bars" class="seq-num-input" value="8" min="1" max="64"></label>
       <button class="ctl-btn" id="seq-play-btn">[▶ PLAY]</button>
     </div>
 
-    <div class="seq-track" id="seq-track"></div>
+    <div class="seq-timeline-wrap" id="seq-timeline-wrap">
+      <div class="seq-ruler" id="seq-ruler"></div>
+      <div class="seq-track" id="seq-track"></div>
+      <div class="seq-playhead" id="seq-playhead"></div>
+    </div>
 
     <div class="seq-builder">
       <div class="note-grid" id="seq-root-grid"></div>
@@ -870,19 +944,29 @@
   const QUALITY_INTERVALS = {};
   Object.keys(CHORD_DICT).forEach(k => { QUALITY_INTERVALS[CHORD_DICT[k]] = k.split(',').map(Number); });
 
-  const seqSteps = []; // { root, quality, beats, hits }
+  const SEQ_PX_PER_BEAT = 26;
+  const SEQ_BEATS_PER_BAR = 4;
+  const SEQ_MIN_CLIP_BEATS = 1;
+
+  const seqClips = []; // { id, root, quality, start, length, hits } — start/length in beats, absolute position on a fixed timeline
+  let seqNextClipId = 1;
   let seqBuilderRoot = 0;
   let seqBuilderQuality = '';
   let seqPlaying = false;
   let seqTimeoutIds = [];
   let seqActiveOscillators = [];
+  let seqPlayheadRAF = null;
 
+  const seqTimelineWrapEl = document.getElementById('seq-timeline-wrap');
+  const seqRulerEl = document.getElementById('seq-ruler');
+  const seqPlayheadEl = document.getElementById('seq-playhead');
   const seqTrackEl = document.getElementById('seq-track');
   const seqRootGrid = document.getElementById('seq-root-grid');
   const seqQualityGrid = document.getElementById('seq-quality-grid');
   const seqBeatsInput = document.getElementById('seq-beats');
   const seqHitsInput = document.getElementById('seq-hits');
   const seqBpmInput = document.getElementById('seq-bpm');
+  const seqBarsInput = document.getElementById('seq-bars');
   const seqPlayBtn = document.getElementById('seq-play-btn');
 
   NOTE_NAMES.forEach((name, pc) => {
@@ -909,47 +993,261 @@
     seqQualityGrid.appendChild(btn);
   });
 
+  function seqTotalBeats(){
+    const bars = Math.max(1, Math.min(64, parseInt(seqBarsInput.value, 10) || 8));
+    return bars * SEQ_BEATS_PER_BAR;
+  }
+
+  function renderRuler(){
+    seqRulerEl.innerHTML = '';
+    const totalBeats = seqTotalBeats();
+    seqRulerEl.style.width = (totalBeats * SEQ_PX_PER_BEAT) + 'px';
+    for(let b = 0; b <= totalBeats; b++){
+      const isMajor = b % SEQ_BEATS_PER_BAR === 0;
+      const tick = document.createElement('div');
+      tick.className = 'seq-ruler-tick' + (isMajor ? ' major' : '');
+      tick.style.left = (b * SEQ_PX_PER_BEAT) + 'px';
+      seqRulerEl.appendChild(tick);
+      if(isMajor && b < totalBeats){
+        const num = document.createElement('div');
+        num.className = 'seq-ruler-num';
+        num.style.left = (b * SEQ_PX_PER_BEAT) + 'px';
+        num.textContent = String(b / SEQ_BEATS_PER_BAR + 1);
+        seqRulerEl.appendChild(num);
+      }
+    }
+  }
+
+  seqBarsInput.addEventListener('change', () => {
+    const total = seqTotalBeats();
+    seqClips.forEach(c => {
+      if(c.length > total) c.length = total;
+      if(c.start + c.length > total) c.start = Math.max(0, total - c.length);
+    });
+    renderTrack();
+    log('TIMELINE LENGTH: ' + Math.round(total / SEQ_BEATS_PER_BAR) + ' BARS', true);
+  });
+
+  // ---- Clip move + resize: Pointer Events unify mouse + touch, so one code
+  // path drives both. Clips are absolutely positioned by (start, length) in
+  // beats — dragging just writes new beat values and re-derives pixels, no
+  // DOM reordering needed. Neighbor bounds are captured once at drag-start so
+  // clips can't be dragged/resized into each other.
+  let seqDrag = null;
+
+  function findLeftNeighborEnd(clip){
+    let bound = 0;
+    seqClips.forEach(c => {
+      if(c === clip) return;
+      const end = c.start + c.length;
+      if(end <= clip.start && end > bound) bound = end;
+    });
+    return bound;
+  }
+  function findRightNeighborStart(clip){
+    let bound = seqTotalBeats();
+    seqClips.forEach(c => {
+      if(c === clip) return;
+      if(c.start >= clip.start + clip.length && c.start < bound) bound = c.start;
+    });
+    return bound;
+  }
+
+  function updateClipMove(clientX){
+    const laneRect = seqTrackEl.getBoundingClientRect();
+    let newStart = Math.round((clientX - laneRect.left) / SEQ_PX_PER_BEAT - seqDrag.grabOffsetBeats);
+    newStart = Math.max(seqDrag.leftBound, Math.min(seqDrag.rightBound - seqDrag.clip.length, newStart));
+    seqDrag.clip.start = newStart;
+    seqDrag.el.style.left = (newStart * SEQ_PX_PER_BEAT) + 'px';
+  }
+
+  function updateClipResize(clientX){
+    const dxBeats = (clientX - seqDrag.startClientX) / SEQ_PX_PER_BEAT;
+    if(seqDrag.mode === 'resize-right'){
+      let newLength = Math.round(seqDrag.origLength + dxBeats);
+      newLength = Math.max(SEQ_MIN_CLIP_BEATS, Math.min(seqDrag.rightBound - seqDrag.clip.start, newLength));
+      seqDrag.clip.length = newLength;
+    } else {
+      let newStart = Math.round(seqDrag.origStart + dxBeats);
+      const maxStart = seqDrag.origStart + seqDrag.origLength - SEQ_MIN_CLIP_BEATS;
+      newStart = Math.max(seqDrag.leftBound, Math.min(maxStart, newStart));
+      seqDrag.clip.length = seqDrag.origLength - (newStart - seqDrag.origStart);
+      seqDrag.clip.start = newStart;
+    }
+    seqDrag.el.style.left = (seqDrag.clip.start * SEQ_PX_PER_BEAT) + 'px';
+    seqDrag.el.style.width = (seqDrag.clip.length * SEQ_PX_PER_BEAT) + 'px';
+  }
+
+  let seqAutoScrollDir = 0, seqAutoScrollRAF = null;
+  function seqEdgeAutoScroll(clientX){
+    const wrapRect = seqTimelineWrapEl.getBoundingClientRect();
+    const margin = 44;
+    if(clientX < wrapRect.left + margin) seqAutoScrollDir = -1;
+    else if(clientX > wrapRect.right - margin) seqAutoScrollDir = 1;
+    else seqAutoScrollDir = 0;
+    if(seqAutoScrollDir !== 0 && !seqAutoScrollRAF) seqAutoScrollStep();
+  }
+  function seqAutoScrollStep(){
+    if(!seqDrag || seqAutoScrollDir === 0){ seqAutoScrollRAF = null; return; }
+    seqTimelineWrapEl.scrollLeft += seqAutoScrollDir * 12;
+    if(seqDrag.mode === 'move') updateClipMove(seqDrag.lastClientX);
+    else updateClipResize(seqDrag.lastClientX);
+    seqAutoScrollRAF = requestAnimationFrame(seqAutoScrollStep);
+  }
+  function seqStopAutoScroll(){
+    seqAutoScrollDir = 0;
+    if(seqAutoScrollRAF) cancelAnimationFrame(seqAutoScrollRAF);
+    seqAutoScrollRAF = null;
+  }
+
+  function attachClipDrag(el, clip){
+    el.addEventListener('pointerdown', (e) => {
+      if(e.target.closest('.seq-clip-remove') || e.target.closest('.seq-clip-handle')) return;
+      if(e.pointerType === 'mouse' && e.button !== 0) return;
+
+      const laneRect = seqTrackEl.getBoundingClientRect();
+      seqDrag = {
+        mode: 'move', clip, el,
+        grabOffsetBeats: (e.clientX - laneRect.left) / SEQ_PX_PER_BEAT - clip.start,
+        leftBound: findLeftNeighborEnd(clip),
+        rightBound: findRightNeighborStart(clip),
+        lastClientX: e.clientX
+      };
+      el.classList.add('seq-clip-dragging');
+      el.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if(!seqDrag || seqDrag.el !== el || seqDrag.mode !== 'move') return;
+      seqDrag.lastClientX = e.clientX;
+      updateClipMove(e.clientX);
+      seqEdgeAutoScroll(e.clientX);
+    });
+
+    function endDrag(){
+      if(!seqDrag || seqDrag.el !== el || seqDrag.mode !== 'move') return;
+      seqStopAutoScroll();
+      el.classList.remove('seq-clip-dragging');
+      log('CLIP MOVED: ' + NOTE_NAMES[clip.root] + clip.quality + ' → BEAT ' + clip.start, true);
+      seqDrag = null;
+    }
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+  }
+
+  function attachClipResize(handleEl, clip, el, side){
+    handleEl.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      if(e.pointerType === 'mouse' && e.button !== 0) return;
+      seqDrag = {
+        mode: 'resize-' + side, clip, el,
+        origStart: clip.start,
+        origLength: clip.length,
+        leftBound: findLeftNeighborEnd(clip),
+        rightBound: findRightNeighborStart(clip),
+        startClientX: e.clientX,
+        lastClientX: e.clientX
+      };
+      handleEl.classList.add('seq-handle-active');
+      handleEl.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    handleEl.addEventListener('pointermove', (e) => {
+      if(!seqDrag || seqDrag.el !== el || seqDrag.mode !== 'resize-' + side) return;
+      seqDrag.lastClientX = e.clientX;
+      updateClipResize(e.clientX);
+      seqEdgeAutoScroll(e.clientX);
+    });
+
+    function endResize(){
+      if(!seqDrag || seqDrag.el !== el || seqDrag.mode !== 'resize-' + side) return;
+      seqStopAutoScroll();
+      handleEl.classList.remove('seq-handle-active');
+      log('CLIP RESIZED: ' + NOTE_NAMES[clip.root] + clip.quality + ' → ' + clip.length + ' BEATS', true);
+      seqDrag = null;
+      renderTrack();
+    }
+    handleEl.addEventListener('pointerup', endResize);
+    handleEl.addEventListener('pointercancel', endResize);
+  }
+
   function renderTrack(){
     seqTrackEl.innerHTML = '';
-    if(seqSteps.length === 0){
+    seqTrackEl.style.width = (seqTotalBeats() * SEQ_PX_PER_BEAT) + 'px';
+
+    if(seqClips.length === 0){
       const empty = document.createElement('div');
       empty.className = 'seq-empty';
       empty.textContent = 'TRACK EMPTY — ADD A CHORD BELOW';
       seqTrackEl.appendChild(empty);
-      return;
     }
-    seqSteps.forEach((step, i) => {
+
+    seqClips.forEach(clip => {
       const el = document.createElement('div');
-      el.className = 'seq-step';
-      el.dataset.index = i;
+      el.className = 'seq-clip';
+      el.dataset.id = clip.id;
+      el.style.left = (clip.start * SEQ_PX_PER_BEAT) + 'px';
+      el.style.width = (clip.length * SEQ_PX_PER_BEAT) + 'px';
+      el.title = clip.length + ' BEATS × ' + clip.hits + (clip.hits > 1 ? ' HITS' : ' HIT');
 
       const removeBtn = document.createElement('button');
-      removeBtn.className = 'seq-step-remove';
+      removeBtn.className = 'seq-clip-remove';
       removeBtn.textContent = '×';
-      removeBtn.addEventListener('click', () => { seqSteps.splice(i, 1); renderTrack(); });
+      removeBtn.addEventListener('click', () => {
+        const idx = seqClips.indexOf(clip);
+        if(idx >= 0) seqClips.splice(idx, 1);
+        renderTrack();
+      });
 
-      const chordEl = document.createElement('div');
-      chordEl.className = 'seq-step-chord';
-      chordEl.textContent = NOTE_NAMES[step.root] + step.quality;
+      const labelEl = document.createElement('div');
+      labelEl.className = 'seq-clip-label';
+      labelEl.textContent = NOTE_NAMES[clip.root] + clip.quality;
 
-      const metaEl = document.createElement('div');
-      metaEl.className = 'seq-step-meta';
-      metaEl.textContent = step.beats + ' beats · x' + step.hits;
+      const hitsEl = document.createElement('div');
+      hitsEl.className = 'seq-clip-hits';
+      for(let h = 0; h < clip.hits; h++){
+        const hit = document.createElement('div');
+        hit.className = 'seq-clip-hit';
+        hitsEl.appendChild(hit);
+      }
+
+      const leftHandle = document.createElement('div');
+      leftHandle.className = 'seq-clip-handle left';
+      const rightHandle = document.createElement('div');
+      rightHandle.className = 'seq-clip-handle right';
 
       el.appendChild(removeBtn);
-      el.appendChild(chordEl);
-      el.appendChild(metaEl);
+      el.appendChild(labelEl);
+      el.appendChild(hitsEl);
+      el.appendChild(leftHandle);
+      el.appendChild(rightHandle);
       seqTrackEl.appendChild(el);
+
+      attachClipDrag(el, clip);
+      attachClipResize(leftHandle, clip, el, 'left');
+      attachClipResize(rightHandle, clip, el, 'right');
     });
+
+    renderRuler();
+    seqPlayheadEl.style.display = seqPlaying ? 'block' : 'none';
   }
   renderTrack();
 
   document.getElementById('seq-add-btn').addEventListener('click', () => {
-    const beats = Math.max(1, Math.min(32, parseInt(seqBeatsInput.value, 10) || 4));
+    const beats = Math.max(SEQ_MIN_CLIP_BEATS, Math.min(32, parseInt(seqBeatsInput.value, 10) || 4));
     const hits = Math.max(1, Math.min(8, parseInt(seqHitsInput.value, 10) || 1));
-    seqSteps.push({ root: seqBuilderRoot, quality: seqBuilderQuality, beats, hits });
+    const totalBeats = seqTotalBeats();
+    const start = seqClips.reduce((m, c) => Math.max(m, c.start + c.length), 0);
+    if(start >= totalBeats){
+      log('TIMELINE FULL — EXTEND LENGTH (BARS) OR DRAG CLIPS TO MAKE ROOM', true);
+      return;
+    }
+    const length = Math.min(beats, totalBeats - start);
+    seqClips.push({ id: seqNextClipId++, root: seqBuilderRoot, quality: seqBuilderQuality, start, length, hits });
     renderTrack();
-    log('TRACK: ADDED ' + NOTE_NAMES[seqBuilderRoot] + seqBuilderQuality + ' (' + beats + 'b x' + hits + ')', true);
+    log('TRACK: ADDED ' + NOTE_NAMES[seqBuilderRoot] + seqBuilderQuality + ' @ BEAT ' + start + ' (' + length + 'b x' + hits + ')', true);
   });
 
   function seqScheduleTone(freq, startTime, duration, peakGain){
@@ -968,50 +1266,65 @@
     osc.onended = () => { seqActiveOscillators = seqActiveOscillators.filter(o => o !== osc); };
   }
 
-  function highlightSeqStep(index){
-    seqTrackEl.querySelectorAll('.seq-step').forEach(el => el.classList.remove('active'));
-    const el = seqTrackEl.querySelector('.seq-step[data-index="' + index + '"]');
-    if(el) el.classList.add('active');
+  function highlightSeqClip(clipId, on){
+    const el = seqTrackEl.querySelector('.seq-clip[data-id="' + clipId + '"]');
+    if(el) el.classList.toggle('active', on);
   }
 
-  // Schedules one full loop of the track using the Web Audio clock (not setTimeout) for
-  // the actual sound, so playback stays sample-accurate regardless of JS timer jitter.
-  // Re-arms itself via setTimeout to schedule the next loop just before this one ends.
+  // Schedules one full loop of the fixed-length timeline using the Web Audio clock
+  // (not setTimeout) for the actual sound, so playback stays sample-accurate
+  // regardless of JS timer jitter. Re-arms itself just before the loop ends.
   function seqCycle(){
-    if(!seqPlaying || seqSteps.length === 0) return;
+    if(!seqPlaying) return;
     ensureAudio();
     const bpm = Math.max(20, Math.min(300, parseInt(seqBpmInput.value, 10) || 90));
     const beatSec = 60 / bpm;
     const lookahead = 0.05;
     const baseTime = audioCtx.currentTime + lookahead;
+    const totalBeats = seqTotalBeats();
+    const totalSec = totalBeats * beatSec;
 
-    let cursorBeats = 0;
-    seqSteps.forEach((step, stepIndex) => {
-      const stepStartSec = cursorBeats * beatSec;
-      const stepDurSec = step.beats * beatSec;
-      const hitDurSec = stepDurSec / step.hits;
-      const intervals = QUALITY_INTERVALS[step.quality] || [0, 4, 7];
-      const pcs = intervals.map(iv => (step.root + iv) % 12);
+    seqClips.forEach(clip => {
+      const clipStartSec = clip.start * beatSec;
+      const clipDurSec = clip.length * beatSec;
+      const hitDurSec = clipDurSec / clip.hits;
+      const intervals = QUALITY_INTERVALS[clip.quality] || [0, 4, 7];
+      const pcs = intervals.map(iv => (clip.root + iv) % 12);
       const midis = voiceChordMidis(pcs, BASE_MIDI);
 
-      for(let h = 0; h < step.hits; h++){
-        const hitStartSec = stepStartSec + h * hitDurSec;
+      for(let h = 0; h < clip.hits; h++){
+        const hitStartSec = clipStartSec + h * hitDurSec;
         midis.forEach(midi => seqScheduleTone(midiToFreq(midi), baseTime + hitStartSec, hitDurSec * 0.9, 0.055));
       }
 
-      const highlightId = setTimeout(() => highlightSeqStep(stepIndex), (lookahead + stepStartSec) * 1000);
-      seqTimeoutIds.push(highlightId);
-
-      cursorBeats += step.beats;
+      const onId = setTimeout(() => highlightSeqClip(clip.id, true), (lookahead + clipStartSec) * 1000);
+      const offId = setTimeout(() => highlightSeqClip(clip.id, false), (lookahead + clipStartSec + clipDurSec) * 1000);
+      seqTimeoutIds.push(onId, offId);
     });
 
-    const totalSec = cursorBeats * beatSec;
+    startSeqPlayhead(baseTime, totalSec, totalBeats);
     const loopId = setTimeout(seqCycle, (lookahead + totalSec) * 1000);
     seqTimeoutIds.push(loopId);
   }
 
+  // Playhead position is derived from the Web Audio clock each frame (not
+  // accumulated), so it can't drift out of sync with the scheduled tones.
+  function startSeqPlayhead(cycleStartTime, totalSec, totalBeats){
+    if(seqPlayheadRAF) cancelAnimationFrame(seqPlayheadRAF);
+    seqPlayheadEl.style.display = 'block';
+    const totalPx = totalBeats * SEQ_PX_PER_BEAT;
+    function tick(){
+      if(!seqPlaying){ seqPlayheadEl.style.display = 'none'; seqPlayheadRAF = null; return; }
+      const elapsed = audioCtx.currentTime - cycleStartTime;
+      const frac = Math.max(0, Math.min(1, totalSec > 0 ? elapsed / totalSec : 0));
+      seqPlayheadEl.style.transform = 'translateX(' + (frac * totalPx) + 'px)';
+      seqPlayheadRAF = requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
   function startSequence(){
-    if(seqSteps.length === 0){ log('TRACK EMPTY — ADD A CHORD FIRST', true); return; }
+    if(seqClips.length === 0){ log('TRACK EMPTY — ADD A CHORD FIRST', true); return; }
     seqPlaying = true;
     seqPlayBtn.textContent = '[■ STOP]';
     log('SEQ PLAYING @ ' + seqBpmInput.value + ' BPM', true);
@@ -1025,7 +1338,9 @@
     const now = audioCtx ? audioCtx.currentTime : 0;
     seqActiveOscillators.forEach(osc => { try{ osc.stop(now); }catch(e){} });
     seqActiveOscillators = [];
-    seqTrackEl.querySelectorAll('.seq-step').forEach(el => el.classList.remove('active'));
+    seqTrackEl.querySelectorAll('.seq-clip').forEach(el => el.classList.remove('active'));
+    if(seqPlayheadRAF){ cancelAnimationFrame(seqPlayheadRAF); seqPlayheadRAF = null; }
+    seqPlayheadEl.style.display = 'none';
     seqPlayBtn.textContent = '[▶ PLAY]';
     log('SEQ STOPPED', true);
   }
