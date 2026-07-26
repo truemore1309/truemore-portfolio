@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TRUEMORE — Portfolio Preview</title>
+<meta property="og:title" content="TRUEMORE — Portfolio" />
+<meta property="og:description" content="Animation Director & CG Generalist Portfolio" />
+<meta property="og:image" content="https://i.imgur.com/lNQUzoi.jpeg" />
+<meta property="og:url" content="https://truemore1309.github.io/" />
+<meta property="og:type" content="website" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="TRUEMORE — Portfolio" />
+<meta name="twitter:description" content="Animation Director & CG Generalist Portfolio" />
+<meta name="twitter:image" content="https://i.imgur.com/lNQUzoi.jpeg" />
+
+<!-- 有 JS 才把元素藏起來等進場；沒 JS 就直接顯示，不會變成一片黑 -->
+<script>document.documentElement.classList.add('js')</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<!-- 標題 Gloock / 標籤 JetBrains Mono / 中文 思源宋體＋思源黑體 -->
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+TC:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- 品牌 Cabinet Grotesk -->
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b0b0c;--fg:#f2f2f2;--muted:#b4b4b4;--accent:#ffffff;--card:#141416;--border:#232327;
+  /* 唯一的邊界留白：只夠讓字不被裁掉，維持滿版的緊 */
+  --edge:clamp(14px,1.6vw,28px);
+  /* 動態曲線：進場用 exp（乾脆的煞車），狀態切換用 smooth */
+  --exp:cubic-bezier(.16,1,.3,1);
+  --smooth:cubic-bezier(.4,0,.2,1);
+
+  /* ---- 三個字體角色 ----
+     01 品牌 TRUEMORE          Cabinet Grotesk  700 / -.035em
+     02 標題 大標與作品名       Gloock           400 / .004em   （中文走思源宋體）
+     03 標籤 ANIMATION DIRECTOR 系列  JetBrains Mono  400 / .12em
+     要換字體只要改這六行，其他 CSS 都是引用變數。 */
+  --f-brand:'Cabinet Grotesk','Noto Sans TC',-apple-system,"PingFang TC",sans-serif;
+  --brand-ls:-.035em;
+  --f-title:'Gloock','Noto Serif TC',"Songti TC",serif;
+  --title-ls:.004em;
+  --f-label:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --label-ls:.12em;
+}
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html,body{
+  margin:0;padding:0;background:var(--bg);color:var(--fg);
+  font-family:var(--f-brand);
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+
+/* ============ NAV ============ */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,11,12,.2);backdrop-filter:saturate(180%) blur(12px);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
+  padding:14px 20px;text-align:center;text-transform:uppercase;
+}
+.nav .brand{
+  font-family:var(--f-brand);color:var(--accent);
+  font-size:13px;font-weight:700;letter-spacing:.06em;
+}
+.nav .menu-btn,.nav .links{display:none !important}
+/* 捲動進度線 */
+.nav .progress{
+  position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--fg);
+  transform-origin:0 50%;transform:scaleX(0);
+}
+
+.container{max-width:1100px;margin:0 auto;padding:0}
+
+/* ============ 遮罩上推：所有標題的共用進場 ============ */
+/* Gloock 和 Cabinet Grotesk 的字身比行高高，緊貼裁切會削到字的頭尾。
+   給 mask 一點內距、再用等量負外距抵銷，版面不變但不會切到字。
+   內距變大之後，起始位移也要跟著加大（>1 + 內距/行高），字才不會先露出來。 */
+.mask{display:block;overflow:hidden;padding-block:.14em;margin-block:-.14em}
+.mask > *{display:block;transition:transform 1s var(--exp) var(--md,0s)}
+.js .mask > *{transform:translateY(132%)}
+.js .in .mask > *,.js .mask.in > *{transform:translateY(0)}
+
+/* ============ HERO ============ */
+.hero{min-height:auto;display:grid;grid-template-columns:1fr;gap:0;align-items:end;padding:0;margin:0}
+.hero .image{width:100%;aspect-ratio:16/9;background:var(--card);overflow:hidden;border:none;border-radius:0}
+.hero .image img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transform:scale(1.1);animation:heroSettle 1.8s var(--exp) .1s both;
+}
+@keyframes heroSettle{to{transform:scale(1)}}
+.hero-text{padding-inline:var(--edge)}
+.hero h1{
+  font-family:var(--f-brand);font-weight:700;letter-spacing:var(--brand-ls);
+  font-size:clamp(40px,7.4vw,88px);line-height:.95;margin:0;text-transform:uppercase;
+}
+.hero p{
+  font-family:var(--f-label);font-weight:400;letter-spacing:var(--label-ls);
+  margin:14px 0 0;color:var(--muted);font-size:clamp(10px,1.25vw,14px);
+  text-transform:uppercase;
+}
+.hero h1 .mask > *{--md:.35s}
+.hero p .mask > *{--md:.5s}
+
+/* ============ PROJECTS（滿版、零間距，不變）============ */
+.project-card{display:block;position:relative;overflow:hidden}
+.project-card .thumb{
+  width:100%;aspect-ratio:2/1;overflow:hidden;position:relative;
+  transition:clip-path 1.05s var(--exp);
+}
+.js .project-card .thumb{clip-path:inset(0 0 100% 0)}
+.js .project-card.in .thumb{clip-path:inset(0 0 0 0)}
+/* 視差層：跟 hover 縮放分開，才不會互相打架（位移由 JS 驅動） */
+.project-card .media{position:absolute;inset:0;transform:scale(1.1)}
+.project-card .thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 1s var(--exp),filter .6s var(--smooth);
+}
+.project-card.top-crop .thumb img{object-position:top}
+.project-card .thumb::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top,rgba(0,0,0,.78),rgba(0,0,0,.15) 45%,transparent 70%);
+  transition:opacity .6s var(--smooth);
+}
+.project-card:hover .thumb img{transform:scale(1.045)}
+.project-card:hover .thumb::after{opacity:.85}
+
+.project-card .overlay{
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+  padding:20px var(--edge);color:var(--accent);text-align:left;pointer-events:none;
+}
+.project-card .title{
+  font-family:var(--f-title);font-weight:400;letter-spacing:var(--title-ls);
+  font-size:clamp(22px,3.6vw,44px);text-transform:uppercase;line-height:1.08;
+  text-shadow:0 2px 20px rgba(0,0,0,.5);
+}
+.project-card .role{
+  font-family:var(--f-label);font-weight:400;letter-spacing:var(--label-ls);
+  font-size:clamp(10px,1.1vw,13px);text-transform:uppercase;margin-top:9px;
+  text-shadow:0 2px 14px rgba(0,0,0,.6);
+  display:flex;align-items:center;gap:10px;
+}
+.project-card .title .mask > *{--md:.32s}
+.project-card .role .mask > *{--md:.42s}
+/* hover 才出現的箭頭 */
+.project-card .role .arrow{
+  opacity:0;transform:translate(-6px,6px);
+  transition:opacity .45s var(--smooth),transform .55s var(--exp);
+}
+.project-card:hover .role .arrow{opacity:1;transform:translate(0,0)}
+
+/* ============ MORE WORK / + 切換鈕 ============ */
+.more-row{display:flex;justify-content:center;padding:44px 0 48px}
+.more-toggle{
+  position:relative;height:74px;width:96px;
+  border-radius:999px;border:1px solid rgba(255,255,255,.28);
+  background:transparent;color:#fff;cursor:pointer;overflow:hidden;
+  font-family:inherit;padding:0;
+  transition:width .8s var(--exp),background .45s var(--smooth),
+             color .45s var(--smooth),border-color .45s var(--smooth);
+}
+.more-toggle.is-text{width:clamp(240px,42vw,320px)}
+.more-toggle .lbl{
+  position:absolute;inset:0;display:grid;place-items:center;
+  transition:opacity .45s var(--smooth),transform .7s var(--exp);
+}
+.lbl-plus{font-family:var(--f-label);font-size:38px;font-weight:400;line-height:1}
+.lbl-text{
+  font-family:var(--f-label);
+  font-size:clamp(11px,1.2vw,13px);font-weight:400;letter-spacing:.16em;
+  text-transform:uppercase;white-space:nowrap;
+}
+/* 預設：+ 顯示，文字在下方待命 */
+.lbl-text{opacity:0;transform:translateY(60%)}
+.more-toggle.is-text .lbl-plus{opacity:0;transform:translateY(-60%) rotate(90deg)}
+.more-toggle.is-text .lbl-text{opacity:1;transform:translateY(0)}
+/* 注意力：外圈每 2 秒擴散一次，跟切換同步 */
+.more-toggle::after{
+  content:"";position:absolute;inset:-1px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.5);
+  animation:ripple 2s var(--exp) infinite;pointer-events:none;
+}
+@keyframes ripple{
+  0%{transform:scale(1);opacity:.55}
+  70%{transform:scale(1.28);opacity:0}
+  100%{transform:scale(1.28);opacity:0}
+}
+.more-toggle:hover{background:#fff;color:#0b0b0c;border-color:#fff}
+.more-toggle:hover::after{animation:none;opacity:0}
+
+/* ============ BORING STUFF ============ */
+.boring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.boring-card{display:block;position:relative;overflow:hidden}
+.boring-card .thumb{width:100%;aspect-ratio:1/1;overflow:hidden;position:relative;
+  transition:clip-path 1.05s var(--exp) var(--d,0s)}
+.js .boring-card .thumb{clip-path:inset(0 0 100% 0)}
+.js .boring-card.in .thumb{clip-path:inset(0 0 0 0)}
+.boring-card img{width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 1s var(--exp)}
+.boring-card:hover img{transform:scale(1.06)}
+.boring-card .overlay{
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+  background:rgba(0,0,0,.5);padding:10px 8px;color:var(--accent);
+  font-family:var(--f-label);font-weight:400;text-align:center;
+  font-size:clamp(9px,1vw,12px);letter-spacing:var(--label-ls);text-transform:uppercase;
+  transition:transform .7s var(--exp) calc(var(--d,0s) + .35s);
+}
+.js .boring-card .overlay{transform:translateY(100%)}
+.js .boring-card.in .overlay{transform:translateY(0)}
+
+/* ============ 巨大標題：靜態置中，進場時遮罩上推 ============ */
+.section-title{
+  color:var(--accent);margin:30px 0;text-transform:uppercase;text-align:center;
+  padding-inline:var(--edge);
+  font-family:var(--f-title);font-weight:400;letter-spacing:var(--title-ls);
+}
+#boring .section-title,#diary .section-title,#more .section-title{
+  font-size:clamp(40px,10.5vw,116px);line-height:1.1;
+}
+/* 沒在畫面裡就別動 —— 動態只發生在你正在看的地方 */
+.idle,.idle *{animation-play-state:paused !important}
+
+/* ============ MISC ============ */
+.placeholder{text-align:center;font-weight:700;color:var(--accent);padding:80px 0;font-size:24px;text-transform:uppercase}
+.footer{
+  font-family:var(--f-label);font-weight:400;letter-spacing:var(--label-ls);
+  padding:40px 20px;text-align:center;color:var(--muted);font-size:11px;text-transform:uppercase;
+}
+.section{scroll-margin-top:64px}
+.top-link{
+  position:fixed;right:18px;bottom:18px;z-index:60;
+  border:1px solid var(--border);background:rgba(20,20,22,.75);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:9px 14px;border-radius:999px;color:var(--fg);
+  font-family:var(--f-label);font-size:11px;letter-spacing:.1em;
+  opacity:0;transform:translateY(12px);pointer-events:none;
+  transition:opacity .5s var(--smooth),transform .6s var(--exp),background .3s var(--smooth);
+}
+.top-link.show{opacity:1;transform:none;pointer-events:auto}
+.top-link:hover{background:#fff;color:#0b0b0c}
+
+#email-link{
+  font-family:var(--f-title);font-weight:400;letter-spacing:var(--title-ls);
+  font-size:clamp(20px,3.4vw,40px);
+  position:relative;display:inline-block;padding-bottom:6px;
+}
+#email-link::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:currentColor;
+  transform:scaleX(0);transform-origin:100% 50%;transition:transform .6s var(--exp);
+}
+#email-link:hover::after{transform:scaleX(1);transform-origin:0 50%}
+
+/* 區塊淡入 */
+.rise{transition:opacity .7s var(--smooth),transform .8s var(--exp)}
+.js .rise{opacity:0;transform:translateY(22px)}
+.js .rise.in{opacity:1;transform:none}
+
+/* ============ SOP 按鈕（原樣保留）============ */
+.sop-btn{
+    display:block;width:100%;height:140px;position:relative;overflow:hidden;
+    border-radius:24px;text-decoration:none;
+    background:linear-gradient(135deg,rgba(255,192,203,.15),rgba(255,105,180,.1));
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(255,182,193,.3);
+    box-shadow:0 8px 32px 0 rgba(255,105,180,.1);
+    transition:transform .5s var(--exp),box-shadow .4s ease,border .4s ease,background .4s ease;
+}
+.sop-btn:hover{
+    transform:translateY(-5px) scale(1.01);
+    box-shadow:0 18px 52px rgba(255,105,180,.3);
+    border-color:rgba(255,182,193,.6);
+    background:linear-gradient(135deg,rgba(255,192,203,.25),rgba(255,105,180,.2));
+}
+.sop-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center}
+.sop-title{font-size:clamp(24px,4vw,36px);font-weight:700;color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,.5);margin-bottom:8px;letter-spacing:.05em}
+.sop-subtitle{
+    font-size:14px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+    animation:breathe 3s infinite ease-in-out;
+    background:linear-gradient(90deg,#fff,#ffe4e1);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+@keyframes breathe{0%,100%{opacity:.7;transform:scale(.95);filter:brightness(.9)}
+  50%{opacity:1;transform:scale(1.05);filter:brightness(1.2)}}
+.sop-bubbles{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.sop-bubble{
+    position:absolute;bottom:-60px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.4),rgba(255,182,193,.1));
+    border:1px solid rgba(255,192,203,.4);
+    box-shadow:inset 0 0 10px rgba(255,105,180,.1);
+    animation:floatUp linear infinite;
+}
+@keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:0}
+  10%{opacity:.5}100%{transform:translateY(-200px) scale(1.1);opacity:0}}
+
+/* ============ WTS 按鈕（原樣保留）============ */
+.wts-btn{
+    display:block;width:100%;height:140px;position:relative;overflow:hidden;
+    border-radius:4px;text-decoration:none;margin-top:16px;
+    background:#000;border:1px solid #1c7a0a;
+    box-shadow:0 0 20px rgba(57,255,20,.08) inset;
+    transition:transform .5s var(--exp),border-color .3s ease,box-shadow .3s ease;
+}
+.wts-btn:hover{
+    transform:translateY(-5px);border-color:#39ff14;
+    box-shadow:0 0 25px rgba(57,255,20,.25) inset,0 0 15px rgba(57,255,20,.2);
+}
+.wts-content{height:100%;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;font-family:'Courier New',monospace}
+.wts-title{font-size:clamp(20px,3vw,28px);font-weight:700;color:#39ff14;
+  text-shadow:0 0 8px rgba(57,255,20,.6);letter-spacing:.05em}
+.wts-subtitle{margin-top:8px;font-size:13px;color:#1c7a0a;letter-spacing:.15em;text-transform:uppercase}
+.wts-subtitle .caret{animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+  .project-card .thumb,.boring-card .thumb{clip-path:none}
+  .mask > *{transform:none}
+  .more-toggle{width:clamp(240px,42vw,320px)}
+  .more-toggle .lbl-plus{opacity:0}
+  .more-toggle .lbl-text{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">TRUEMORE</div>
+  <div class="progress"></div>
+</nav>
+
+<main class="container">
+  <!-- HERO -->
+  <section id="home" class="section">
+    <div class="hero">
+      <div class="image"><img id="hero-img" alt="Hero" /></div>
+      <div class="hero-text">
+        <h1><span class="mask"><span id="hero-title"></span></span></h1>
+        <p><span class="mask"><span id="hero-sub"></span></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="section">
+    <div id="projects-grid"></div>
+    <div class="more-row" id="more-row"></div>
+  </section>
+
+  <!-- BORING STUFF -->
+  <section id="boring" class="section">
+    <div class="section-title"><span class="mask"><span>BORING STUFF</span></span></div>
+    <div class="boring-grid" id="boring-grid"></div>
+  </section>
+
+  <!-- DEVELOP -->
+  <section id="diary" class="section">
+    <div class="section-title"><span class="mask"><span>DEVELOP</span></span></div>
+    <a href="social-sop.html" target="_blank" rel="noopener" class="sop-btn rise">
+        <div class="sop-bubbles" id="sop-bubbles"></div>
+        <div class="sop-content">
+            <div class="sop-title">帶來幸福的社交SOP</div>
+            <div class="sop-subtitle">點擊體驗</div>
+        </div>
+    </a>
+    <a href="wts.html" target="_blank" rel="noopener" class="wts-btn rise">
+        <div class="wts-content">
+            <div class="wts-title">WTS — What The Sound</div>
+            <div class="wts-subtitle">&gt; RUN CHORD.EXE<span class="caret">_</span></div>
+        </div>
+    </a>
+  </section>
+
+  <!-- MORE -->
+  <section id="more" class="section">
+    <div class="section-title"><span class="mask"><span>AND MORE…</span></span></div>
+    <p style="text-align:center;" class="rise"><a id="email-link"></a></p>
+  </section>
+</main>
+
+<a class="top-link" href="#home">▲ Top</a>
+<div class="footer">THIS WEBSITE WAS MADE BY ©TRUEMORE</div>
+
+<script>
+// ===== Data =====
+const hero = {title:'TRUEMORE', subtitle:'ANIMATION DIRECTOR & CG GENERALIST', image:'https://i.imgur.com/lNQUzoi.jpeg'};
+function ytThumb(url){
+  const m = url && (url.match(/[?&]v=([\w-]{11})/) || url.match(/youtu\.be\/([\w-]{11})/));
+  return m ? `https://img.youtube.com/vi/${m[1]}/maxresdefault.jpg` : '';
+}
+const projects = [
+  {name:'亞洲電子競技公開賽', role:'ANIMATION DIRECTOR', url:'https://youtu.be/tXtDOLzmwvk'},
+  {name:'MSIology｜Dragonforged Dominance', role:'ANIMATION DIRECTOR', thumb:'https://i.postimg.cc/cLHgZWBm/2.jpg', url:'https://youtu.be/_pXLO7jGqDw'},
+  {name:'96分鐘', role:'ANIMATION DIRECTOR', url:'https://www.youtube.com/watch?v=55MGF0stYzk'},
+  {name:'2024金馬年度廣告', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Epiqjg5.jpeg', url:'https://www.youtube.com/watch?v=AknyAsiava4'},
+  {name:'台灣福斯商旅', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Ofu77yl.jpeg', url:'https://www.youtube.com/watch?v=OuzoLiM-cBU'},
+  {name:'雙吳推薦｜御茶園 真好茶', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/P8bvaEy.jpeg', url:'https://www.youtube.com/watch?v=ZaodEebzfrA'},
+  {name:'百齡罈40年｜大師之路系列', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/wjRVFEM.jpeg', url:'https://www.wepeople.club/tsai_ming_liang-ball...'},
+  {name:'動力火車 X 林俊傑｜俯衝的靈魂', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/zoiwWxv.jpeg', url:'https://www.youtube.com/watch?v=8zeXS7s7jok'},
+  {name:'潘朵拉｜命運先知', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/iL5IvXs.jpeg', url:'https://www.youtube.com/watch?v=WkuzC_axw-Q'},
+  {name:'亞培葡勝納｜戴資穎推薦', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/uFiG0jo.jpeg', url:'https://www.youtube.com/watch?v=zPu48_H1jc0'},
+  {name:'滅火器 X 戰酒黑金龍 Stronger Together', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/KidEcxY.jpeg', url:'https://www.youtube.com/watch?v=H1jLJC9iT1Q'},
+  {name:'格蘭利威年度大片｜創 新自我', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/5VhaPBo.jpeg', url:'https://www.youtube.com/watch?v=re7LJsYNTOw'},
+  {name:'46屆金穗獎｜對面 Home for Sale', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/4AO50Ow.jpeg', url:'https://ghsa.org.tw/gha/festival/film/1112'},
+  {name:'Claw A1M｜Grip and Game | MSI', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Kyzf2R2.jpeg', url:'https://www.youtube.com/watch?v=AlKkHZD21BU'}
+];
+const boring = [
+  {name:'SCREEAAM', thumb:'https://i.postimg.cc/JH42Z219/A.png', url:'https://www.instagram.com/p/C60CLmAPdUy/?igsh=MW12bmYxNm42NXF1bg=='},
+  {name:"RIDER'S ON THE STONE", thumb:'https://i.postimg.cc/dLfxZ6zY/B.png', url:'https://www.instagram.com/reel/CzbiKlSPUpA/?igsh=MThjdnF6NmR1aGNvZg=='},
+  {name:'PINKCHAIN', thumb:'https://i.postimg.cc/56rRQgDD/C.png', url:'https://www.instagram.com/p/C5znpsAP3De/?igsh=bW55bnJ0bG9pZ3J1'}
+];
+const email = 'truemore1309@gmail.com';
+
+// ===== Hero =====
+document.getElementById('hero-img').src = hero.image;
+document.getElementById('hero-title').textContent = hero.title;
+document.getElementById('hero-sub').textContent = hero.subtitle;
+
+// ===== 進場觀察器 =====
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:.12, rootMargin:'0px 0px -6% 0px'});
+const watch = el => io.observe(el);
+
+// Hero 標題不等捲動，載入就進場
+requestAnimationFrame(()=> document.querySelector('.hero').closest('.section').classList.add('in'));
+
+// ===== Projects =====
+const pg = document.getElementById('projects-grid');
+projects.forEach((p,i)=>{
+  const a = document.createElement('a');
+  a.className = 'project-card';
+  if((p.name||'').includes('金馬')) a.classList.add('top-crop');
+  a.href = p.url || '#';
+  if(p.url){ a.target='_blank'; a.rel='noopener'; }
+  const thumb = p.thumb || ytThumb(p.url) || hero.image;
+  const roleText = i>=2 ? 'CG GENERALIST' : (p.role||'');
+  a.innerHTML = `
+    <div class="thumb">
+      <div class="media"><img src="${thumb}" alt="${p.name}" loading="lazy"></div>
+    </div>
+    <div class="overlay">
+      <div class="title"><span class="mask"><span>${p.name}</span></span></div>
+      <div class="role"><span class="mask"><span>${roleText}</span></span><span class="arrow">↗</span></div>
+    </div>`;
+  if(i>3){ a.style.display='none'; a.classList.add('hidden-proj'); }
+  pg.appendChild(a);
+  if(i<=3) watch(a);
+});
+
+// ===== MORE WORK ⇄ + 切換鈕 =====
+(function initMoreToggle(){
+  const hidden = () => pg.querySelectorAll('.hidden-proj');
+  if(!hidden().length) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'more-toggle';
+  btn.setAttribute('aria-label', `顯示其餘 ${hidden().length} 件作品`);
+  btn.innerHTML = `<span class="lbl lbl-plus">+</span>
+                   <span class="lbl lbl-text">More Work (${hidden().length})</span>`;
+  document.getElementById('more-row').appendChild(btn);
+
+  // 每 2 秒在「+」和「MORE WORK」之間切換，讓人知道它可以按
+  let alt = false, hovering = false;
+  const timer = setInterval(()=>{
+    if(hovering) return;
+    alt = !alt;
+    btn.classList.toggle('is-text', alt);
+  }, 2000);
+
+  btn.addEventListener('mouseenter', ()=>{ hovering = true;  btn.classList.add('is-text'); });
+  btn.addEventListener('mouseleave', ()=>{ hovering = false; btn.classList.toggle('is-text', alt); });
+
+  btn.addEventListener('click', ()=>{
+    clearInterval(timer);
+    hidden().forEach((el,i)=>{
+      el.style.display = 'block';
+      setTimeout(()=> watch(el), i * 40);   // 依序進場，不要一次全開
+    });
+    btn.parentElement.remove();
+  });
+})();
+
+// ===== Boring Stuff =====
+const bg = document.getElementById('boring-grid');
+boring.forEach((b,i)=>{
+  const a = document.createElement('a');
+  a.className = 'boring-card';
+  a.href = b.url || '#';
+  if(b.url){ a.target='_blank'; a.rel='noopener'; }
+  a.style.setProperty('--d', (i*0.1)+'s');
+  a.innerHTML = `
+    <div class="thumb"><img src="${b.thumb}" alt="${b.name}" loading="lazy"></div>
+    <div class="overlay">${b.name}</div>`;
+  bg.appendChild(a);
+  watch(a);
+});
+
+// ===== 巨大標題：捲到了才遮罩上推 =====
+document.querySelectorAll('.section-title .mask').forEach(watch);
+
+// ===== Email =====
+const mail = document.getElementById('email-link');
+mail.href = 'mailto:' + email;
+mail.textContent = email;
+
+// ===== 其餘進場 =====
+document.querySelectorAll('.rise').forEach(watch);
+
+// ===== 捲動：進度線 / 視差 / 回頂鈕（單一 rAF 迴圈）=====
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const topLink  = document.querySelector('.top-link');
+const progress = document.querySelector('.nav .progress');
+
+// 只對「目前在畫面附近」的卡片做視差，捲到別處就不算了
+const inView = new Set();
+const pio = new IntersectionObserver(entries=>{
+  entries.forEach(e => e.isIntersecting ? inView.add(e.target) : inView.delete(e.target));
+}, {rootMargin:'25% 0px'});
+const addParallax = el => { if(!reduceMotion) pio.observe(el); };
+
+function onScroll(){
+  const vh  = innerHeight;
+  const max = document.documentElement.scrollHeight - vh;
+
+  progress.style.transform = 'scaleX(' + (max > 0 ? Math.min(scrollY / max, 1) : 0) + ')';
+  topLink.classList.toggle('show', scrollY > vh * .9);
+
+  inView.forEach(card=>{
+    const media = card.querySelector('.media');
+    if(!media) return;
+    const r = card.getBoundingClientRect();
+    // p: 卡片在畫面中的位置，-1（下方剛進場）→ 1（上方要離開）
+    const p = (r.top + r.height / 2 - vh / 2) / ((vh + r.height) / 2);
+    media.style.transform = 'scale(1.1) translateY(' + (p * -4.5).toFixed(2) + '%)';
+  });
+}
+
+pg.querySelectorAll('.project-card').forEach(addParallax);
+
+// 循環動畫（跑馬燈 / 泡泡 / 光圈）離開畫面就暫停
+const idleObserver = new IntersectionObserver(entries=>{
+  entries.forEach(e => e.target.classList.toggle('idle', !e.isIntersecting));
+}, {rootMargin:'10% 0px'});
+document.querySelectorAll('#boring,#diary,#more,.more-row').forEach(el=>{
+  el.classList.add('idle');
+  idleObserver.observe(el);
+});
+
+let ticking = false;
+addEventListener('scroll', ()=>{
+  if(ticking) return;
+  ticking = true;
+  requestAnimationFrame(()=>{ onScroll(); ticking = false; });
+}, {passive:true});
+addEventListener('resize', onScroll, {passive:true});
+onScroll();
+
+// ===== SOP bubbles =====
+(function initSopBubbles(){
+  const c = document.getElementById('sop-bubbles');
+  if(!c) return;
+  for(let i=0;i<20;i++){
+    const b = document.createElement('div');
+    b.className = 'sop-bubble';
+    const size = Math.random()*40 + 10;
+    b.style.width = size+'px';
+    b.style.height = size+'px';
+    b.style.left = (Math.random()*100)+'%';
+    b.style.animationDuration = (Math.random()*5+4)+'s';
+    b.style.animationDelay = (Math.random()*5)+'s';
+    c.appendChild(b);
+  }
+})();
+
+// ===== 保險絲 =====
+// 若 2.5 秒後連第一張卡都沒進場（observer 沒作用、頁面沒在算繪、瀏覽器太舊），
+// 就把全部內容直接顯示出來 —— 寧可沒有動態，也不能是一片黑。
+setTimeout(()=>{
+  if(document.querySelector('.project-card.in')) return;
+  document.querySelectorAll('.section,.project-card,.boring-card,.rise')
+          .forEach(el=>el.classList.add('in'));
+  document.querySelectorAll('.idle').forEach(el=>el.classList.remove('idle'));
+}, 2500);
+
+// ===== Tests =====
+(function tests(){
+  const fail = m => console.error('[TEST FAIL]', m);
+  if(!Array.isArray(projects) || projects.length !== 14) fail('expected 14 projects, got '+projects.length);
+  if(projects.some(p=>!p.url)) fail('one or more projects missing url');
+  if(!projects.some(p=>(p.name||'').includes('金馬'))) fail('金馬 project missing');
+})();
+</script>
+</body>
+</html>

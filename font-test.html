@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TRUEMORE — 三字體混搭器</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+
+<!-- 品牌用無襯線 -->
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- 標題用襯線 -->
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..700&family=Gloock&family=Playfair+Display:wght@400..700&family=Prata&family=Newsreader:opsz,wght@6..72,300..600&family=Frank+Ruhl+Libre:wght@300..700&family=Literata:opsz,wght@7..72,300..600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<!-- 標籤用等寬 + 中文 -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Fontshare -->
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=switzer@400,500,600,700&f[]=zodiak@400,500,700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b0b0c;--fg:#f2f2f2;--muted:#b4b4b4;--faint:#6a6a72;--line:#232327;
+  --edge:clamp(14px,1.6vw,28px);
+  --ui:'Inter Tight',sans-serif;
+
+  /* 三個角色 —— JS 會改這些 */
+  --brand-ff:'Cabinet Grotesk',sans-serif;   --brand-w:700; --brand-ls:-.035em;
+  --title-ff:'Gloock',serif;                 --title-w:400; --title-ls:.004em;
+  --label-ff:'Inter Tight',sans-serif;       --label-w:500; --label-ls:.16em;
+  --cjk:'Noto Serif TC',serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ui);-webkit-font-smoothing:antialiased}
+
+/* ---------- 控制列 ---------- */
+.panel{
+  position:sticky;top:0;z-index:60;background:rgba(11,11,12,.9);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);padding:14px var(--edge);
+}
+.rows{display:flex;gap:12px 18px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:6px;min-width:190px;flex:1 1 190px}
+.field label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.field .role{color:#ffb37a}
+select{
+  font-family:var(--ui);font-size:13px;color:var(--fg);background:#141417;
+  border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;
+  appearance:none;cursor:pointer;
+}
+select:focus{outline:1px solid #555;border-color:#555}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.presets button{
+  font-family:var(--ui);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px;cursor:pointer;transition:.2s;
+}
+.presets button:hover{color:#0b0b0c;background:#fff;border-color:#fff}
+.recipe{
+  margin-top:12px;font-size:11px;color:var(--faint);letter-spacing:.02em;
+  font-family:'JetBrains Mono',monospace;line-height:1.7;word-break:break-all;
+}
+.recipe b{color:#ffb37a;font-weight:400}
+
+/* ---------- 預覽（版面設定跟 index-v3 一致） ---------- */
+.note{padding:26px var(--edge) 0;max-width:800px;color:var(--muted);font-size:13.5px;line-height:1.8}
+.note b{color:#fff;font-weight:600}
+.slot{
+  padding:2px var(--edge) 0;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:#7a5a3c;margin-top:26px;
+}
+
+.hero-title{
+  font-family:var(--brand-ff);font-weight:var(--brand-w);letter-spacing:var(--brand-ls);
+  font-size:clamp(40px,7.4vw,88px);line-height:.95;margin:0;padding:0 var(--edge);
+  text-transform:uppercase;
+}
+.hero-sub{
+  font-family:var(--label-ff);font-weight:var(--label-w);letter-spacing:var(--label-ls);
+  margin:14px 0 0;padding:0 var(--edge);color:var(--muted);
+  font-size:clamp(12px,1.5vw,17px);text-transform:uppercase;
+}
+.sec-title{
+  font-family:var(--title-ff),var(--cjk);font-weight:var(--title-w);letter-spacing:var(--title-ls);
+  font-size:clamp(40px,10.5vw,116px);line-height:1.12;text-align:center;
+  padding:30px var(--edge) 24px;text-transform:uppercase;
+}
+.card{position:relative;margin-top:8px}
+.card img{width:100%;aspect-ratio:2/1;object-fit:cover;display:block}
+.card::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.78),rgba(0,0,0,.15) 45%,transparent 70%)}
+.card .ov{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:20px var(--edge)}
+.card .t{
+  font-family:var(--title-ff),var(--cjk);font-weight:var(--title-w);letter-spacing:var(--title-ls);
+  font-size:clamp(22px,3.6vw,44px);text-transform:uppercase;line-height:1.08;
+  text-shadow:0 2px 20px rgba(0,0,0,.5);
+}
+.card .r{
+  font-family:var(--label-ff);font-weight:var(--label-w);letter-spacing:var(--label-ls);
+  font-size:clamp(11px,1.3vw,15px);text-transform:uppercase;margin-top:9px;
+  text-shadow:0 2px 14px rgba(0,0,0,.6);color:#fff;
+}
+.morebtn{
+  margin:44px auto;display:block;height:70px;width:290px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;
+  font-family:var(--label-ff);font-weight:var(--label-w);letter-spacing:var(--label-ls);
+  font-size:13px;text-transform:uppercase;
+}
+.footer{
+  padding:34px var(--edge) 60px;text-align:center;color:var(--muted);
+  font-family:var(--label-ff);font-weight:var(--label-w);letter-spacing:var(--label-ls);font-size:11px;
+  text-transform:uppercase;
+}
+.warn{color:#ff6b5a;font-size:12px;padding:8px var(--edge)}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="rows">
+    <div class="field">
+      <label><span class="role">01 品牌</span> — TRUEMORE（無襯線）</label>
+      <select id="sel-brand"></select>
+    </div>
+    <div class="field">
+      <label><span class="role">02 標題</span> — BORING STUFF / 作品名</label>
+      <select id="sel-title"></select>
+    </div>
+    <div class="field">
+      <label><span class="role">03 標籤</span> — ANIMATION DIRECTOR 系列</label>
+      <select id="sel-label"></select>
+    </div>
+    <div class="field" style="flex:0 0 150px;min-width:150px">
+      <label>中文</label>
+      <select id="sel-cjk">
+        <option value="'Noto Serif TC',serif">思源宋體</option>
+        <option value="'Noto Sans TC',sans-serif">思源黑體</option>
+      </select>
+    </div>
+  </div>
+  <div class="presets">
+    <button data-p="sharp">銳利 · Cabinet + Bodoni</button>
+    <button data-p="solid">厚實 · Cabinet + Gloock</button>
+    <button data-p="editorial">編輯 · Switzer + Newsreader</button>
+    <button data-p="middle">中間值 · Cabinet + Frank Ruhl</button>
+    <button data-p="tech">標註感 · Cabinet + Gloock + Mono</button>
+  </div>
+  <div class="recipe" id="recipe"></div>
+</div>
+
+<div class="note">
+  <p>三個下拉選單即時套用，版面跟 index-v3 完全一致。<b>直接調到你順眼為止，然後把上面那行設定貼給我</b>，我就換進去。</p>
+  <p>先講一個實話：三個字體是可行的，但比兩個難駕馭 —— 因為 <b>TRUEMORE 和標籤都是無襯線</b>，兩者太像會顯得髒，差太多又會散。最穩的做法是「品牌和標籤用同一套無襯線的不同字重」（等於 2 個字體做 3 件事）。所以我把兩個欄位設成可以選一樣的，你可以自己比比看差別值不值得。</p>
+</div>
+
+<div class="slot">01 品牌</div>
+<div class="hero-title">TRUEMORE</div>
+<div class="slot">03 標籤</div>
+<div class="hero-sub">Animation Director &amp; CG Generalist</div>
+
+<div class="slot">02 標題</div>
+<div class="sec-title">Boring Stuff</div>
+
+<div class="card">
+  <img src="https://i.postimg.cc/cLHgZWBm/2.jpg" alt="">
+  <div class="ov">
+    <div class="t">MSIology｜Dragonforged Dominance</div>
+    <div class="r">Animation Director</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:0">
+  <img src="https://i.imgur.com/Epiqjg5.jpeg" alt="">
+  <div class="ov">
+    <div class="t">2024金馬年度廣告</div>
+    <div class="r">CG Generalist</div>
+  </div>
+</div>
+
+<button class="morebtn">More Work (10)</button>
+
+<div class="sec-title">Develop</div>
+<div class="sec-title">And More…</div>
+<div class="footer">This website was made by ©Truemore</div>
+
+<script>
+// 每個字體在「該角色的尺寸」下該用的字重與字距
+const BRAND = [
+  ['Cabinet Grotesk', "'Cabinet Grotesk',sans-serif", 700, '-.035em'],
+  ['Switzer',         "'Switzer',sans-serif",         600, '-.035em'],
+  ['Inter Tight',     "'Inter Tight',sans-serif",     600, '-.03em' ],
+  ['Instrument Sans', "'Instrument Sans',sans-serif", 600, '-.03em' ],
+  ['Space Grotesk',   "'Space Grotesk',sans-serif",   600, '-.03em' ]
+];
+const TITLE = [
+  ['Gloock',           "'Gloock',serif",           400, '.004em' ],
+  ['Bodoni Moda',      "'Bodoni Moda',serif",      500, '.012em' ],
+  ['Playfair Display', "'Playfair Display',serif", 500, '-.005em'],
+  ['Prata',            "'Prata',serif",            400, '.008em' ],
+  ['Instrument Serif', "'Instrument Serif',serif", 400, '.004em' ],
+  ['Newsreader',       "'Newsreader',serif",       500, '-.01em' ],
+  ['Frank Ruhl Libre', "'Frank Ruhl Libre',serif", 500, '-.008em'],
+  ['Literata',         "'Literata',serif",         500, '-.015em'],
+  ['Zodiak',           "'Zodiak',serif",           500, '-.014em']
+];
+const LABEL = [
+  ['Inter Tight',     "'Inter Tight',sans-serif",     500, '.16em'],
+  ['Switzer',         "'Switzer',sans-serif",         500, '.16em'],
+  ['Cabinet Grotesk', "'Cabinet Grotesk',sans-serif", 500, '.15em'],
+  ['Instrument Sans', "'Instrument Sans',sans-serif", 500, '.16em'],
+  ['JetBrains Mono',  "'JetBrains Mono',monospace",   400, '.12em'],
+  ['Space Mono',      "'Space Mono',monospace",       400, '.10em']
+];
+
+const root = document.documentElement;
+const sel = { brand:sel_('sel-brand',BRAND), title:sel_('sel-title',TITLE), label:sel_('sel-label',LABEL) };
+function sel_(id, list){
+  const el = document.getElementById(id);
+  list.forEach(([name],i)=>{
+    const o = document.createElement('option');
+    o.value = i; o.textContent = name;
+    el.appendChild(o);
+  });
+  el.setAttribute('autocomplete','off');   // 別讓瀏覽器還原上一次的選擇
+  el.value = 0;
+  el.addEventListener('change', apply);
+  return el;
+}
+document.getElementById('sel-cjk').addEventListener('change', apply);
+
+function apply(){
+  const b = BRAND[sel.brand.value], t = TITLE[sel.title.value], l = LABEL[sel.label.value];
+  const cjk = document.getElementById('sel-cjk').value;
+  root.style.setProperty('--brand-ff', b[1]); root.style.setProperty('--brand-w', b[2]); root.style.setProperty('--brand-ls', b[3]);
+  root.style.setProperty('--title-ff', t[1]); root.style.setProperty('--title-w', t[2]); root.style.setProperty('--title-ls', t[3]);
+  root.style.setProperty('--label-ff', l[1]); root.style.setProperty('--label-w', l[2]); root.style.setProperty('--label-ls', l[3]);
+  root.style.setProperty('--cjk', cjk);
+
+  document.getElementById('recipe').innerHTML =
+    `<b>01 品牌</b> ${b[0]} ${b[2]} / ${b[3]}　　` +
+    `<b>02 標題</b> ${t[0]} ${t[2]} / ${t[3]}　　` +
+    `<b>03 標籤</b> ${l[0]} ${l[2]} / ${l[3]}　　` +
+    `<b>中文</b> ${cjk.includes('Serif') ? '思源宋體' : '思源黑體'}`;
+}
+
+const PRESETS = {
+  sharp:     { brand:'Cabinet Grotesk', title:'Bodoni Moda',      label:'Inter Tight',     cjk:0 },
+  solid:     { brand:'Cabinet Grotesk', title:'Gloock',           label:'Inter Tight',     cjk:0 },
+  editorial: { brand:'Switzer',         title:'Newsreader',       label:'Switzer',         cjk:0 },
+  middle:    { brand:'Cabinet Grotesk', title:'Frank Ruhl Libre', label:'Inter Tight',     cjk:0 },
+  tech:      { brand:'Cabinet Grotesk', title:'Gloock',           label:'JetBrains Mono',  cjk:0 }
+};
+const idxOf = (list,name) => list.findIndex(f=>f[0]===name);
+document.querySelectorAll('.presets button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const p = PRESETS[btn.dataset.p];
+    sel.brand.value = idxOf(BRAND,p.brand);
+    sel.title.value = idxOf(TITLE,p.title);
+    sel.label.value = idxOf(LABEL,p.label);
+    document.getElementById('sel-cjk').selectedIndex = p.cjk;
+    apply();
+  });
+});
+
+apply();
+
+// 字體是延遲載入的，先叫醒再檢查，沒載到就在最上面標紅字
+(async ()=>{
+  const names = [...new Set([...BRAND,...TITLE,...LABEL].map(f=>f[0]))];
+  await Promise.all([
+    ...names.map(n => document.fonts.load('400 40px "'+n+'"','TRUEMORE').catch(()=>{})),
+    document.fonts.load('400 40px "Noto Serif TC"','金馬').catch(()=>{}),
+    document.fonts.load('400 40px "Noto Sans TC"','金馬').catch(()=>{})
+  ]);
+  const bad = names.filter(n => !document.fonts.check('400 40px "'+n+'"','TRUEMORE'));
+  ['Noto Serif TC','Noto Sans TC'].forEach(n=>{
+    if(!document.fonts.check('400 40px "'+n+'"','金馬')) bad.push(n);
+  });
+  if(bad.length){
+    const d = document.createElement('div');
+    d.className = 'warn';
+    d.textContent = '⚠ 這些字體沒載入成功，顯示的是系統替代字體：' + bad.join('、');
+    document.querySelector('.note').prepend(d);
+  }
+})();
+</script>
+</body>
+</html>
