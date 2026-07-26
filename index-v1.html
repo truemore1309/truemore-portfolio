@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TRUEMORE — Portfolio Preview</title>
+<meta property="og:title" content="TRUEMORE — Portfolio" />
+<meta property="og:description" content="Animation Director & CG Generalist Portfolio" />
+<meta property="og:image" content="https://i.imgur.com/lNQUzoi.jpeg" />
+<meta property="og:url" content="https://truemore1309.github.io/" />
+<meta property="og:type" content="website" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="TRUEMORE — Portfolio" />
+<meta name="twitter:description" content="Animation Director & CG Generalist Portfolio" />
+<meta name="twitter:image" content="https://i.imgur.com/lNQUzoi.jpeg" />
+<style>
+:root{--bg:#0b0b0c;--fg:#f2f2f2;--muted:#b4b4b4;--accent:#ffffff;--card:#141416;--border:#232327}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif}
+a{color:inherit;text-decoration:none}
+/* 導覽列只顯示透明背景和 TRUEMORE 品牌文字 */
+.nav{position:sticky;top:0;z-index:50;background:rgba(11,11,12,0.2);backdrop-filter:saturate(180%) blur(12px);padding:14px 20px;text-align:center;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.nav .brand{color:var(--accent);}
+.nav .menu-btn,.nav .links{display:none !important}
+.container{max-width:1100px;margin:0 auto;padding:0}
+/* HERO */
+.hero{min-height:auto;display:grid;grid-template-columns:1fr;gap:0;align-items:end;padding:0;margin:0}
+.hero .image{width:100%;aspect-ratio:16/9;background:var(--card);overflow:hidden;border:none;border-radius:0}
+.hero .image img{width:100%;height:100%;object-fit:cover;display:block}
+.hero h1{font-size:clamp(40px,7vw,84px);line-height:.95;margin:0;letter-spacing:-.02em;text-transform:uppercase}
+.hero p{margin-top:12px;color:var(--muted);font-size:clamp(14px,1.8vw,20px);text-transform:uppercase;font-weight:700}
+/* PROJECTS */
+.project-card{display:block;position:relative;overflow:hidden;opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.project-card.visible{opacity:1;transform:translateY(0)}
+.project-card .thumb{width:100%;aspect-ratio:2/1;overflow:hidden;position:relative}
+.project-card .thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%)}
+.project-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+/* 金馬卡片：圖片置頂裁切，以保留上緣關鍵字 */
+.project-card.top-crop .thumb img{object-position:top}
+.project-card .overlay{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:20px;color:var(--accent);text-align:left}
+.project-card .title{font-weight:900;font-size:clamp(28px,4vw,48px);text-transform:uppercase}
+.project-card .role{font-size:clamp(14px,2vw,24px);text-transform:uppercase;margin-top:4px;font-weight:800}
+/* BORING STUFF */
+.boring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.boring-card{display:block;position:relative;overflow:hidden;opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.boring-card.visible{opacity:1;transform:translateY(0)}
+.boring-card .thumb{width:100%;aspect-ratio:1/1}
+.boring-card img{width:100%;height:100%;object-fit:cover;display:block}
+.boring-card .overlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);padding:8px;color:var(--accent);font-weight:700;text-align:center}
+/* TITLES */
+.section-title{text-align:center;font-weight:700;color:var(--accent);margin:20px 0;text-transform:uppercase}
+#boring .section-title,#diary .section-title,#more .section-title{font-size:clamp(48px,12vw,120px);letter-spacing:.08em}
+/* MISC */
+.placeholder{text-align:center;font-weight:700;color:var(--accent);padding:80px 0;font-size:24px;text-transform:uppercase}
+.footer{padding:40px 20px;text-align:center;color:var(--muted)}
+.section{scroll-margin-top:64px}
+.top-link{position:fixed;right:18px;bottom:18px;border:1px solid var(--border);background:var(--card);padding:8px 12px;border-radius:999px;color:var(--fg)}
+#email-link{font-size:2em;}
+
+/* SOP Button Styles */
+.sop-btn {
+    display: block;
+    width: 100%;
+    /* Remove padding to allow content to fill height */
+    height: 140px; 
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    text-decoration: none;
+    /* Glassmorphism - Pink Style */
+    background: linear-gradient(135deg, rgba(255, 192, 203, 0.15), rgba(255, 105, 180, 0.1)); 
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 182, 193, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(255, 105, 180, 0.1);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease, border 0.4s ease, background 0.4s ease;
+}
+.sop-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 50px rgba(255, 105, 180, 0.3);
+    border-color: rgba(255, 182, 193, 0.6);
+    background: linear-gradient(135deg, rgba(255, 192, 203, 0.25), rgba(255, 105, 180, 0.2));
+}
+
+.sop-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.sop-title {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+.sop-subtitle {
+    font-size: 14px;
+    color: #fff0f5; /* LavenderBlush */
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: breathe 3s infinite ease-in-out;
+    font-weight: 600;
+    background: linear-gradient(90deg, #fff, #ffe4e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.7; transform: scale(0.95); filter: brightness(0.9); }
+    50% { opacity: 1; transform: scale(1.05); filter: brightness(1.2); }
+}
+
+/* Bubbles */
+.sop-bubbles {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.sop-bubble {
+    position: absolute;
+    bottom: -60px; /* Start below */
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), rgba(255, 182, 193, 0.1));
+    border-radius: 50%;
+    border: 1px solid rgba(255, 192, 203, 0.4);
+    box-shadow: inset 0 0 10px rgba(255, 105, 180, 0.1);
+    animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.5; }
+    100% { transform: translateY(-200px) scale(1.1); opacity: 0; }
+}
+
+/* WTS Button Styles (retro BIOS terminal) */
+.wts-btn {
+    display: block;
+    width: 100%;
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-top: 16px;
+    background: #000;
+    border: 1px solid #1c7a0a;
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.08) inset;
+    transition: all 0.3s ease;
+}
+.wts-btn:hover {
+    border-color: #39ff14;
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.25) inset, 0 0 15px rgba(57, 255, 20, 0.2);
+}
+.wts-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+}
+.wts-title {
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 700;
+    color: #39ff14;
+    text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+    letter-spacing: 0.05em;
+}
+.wts-subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #1c7a0a;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+<!-- 導覽列僅顯示透明背景 + TRUEMORE 文字 -->
+<nav class="nav">
+  <div class="brand">TRUEMORE</div>
+</nav>
+
+<main class="container">
+  <!-- HERO -->
+  <section id="home" class="section">
+    <div class="hero">
+      <div class="image"><img id="hero-img" alt="Hero" /></div>
+      <div>
+        <h1 id="hero-title"></h1>
+        <p id="hero-sub"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="section">
+    <div id="projects-grid"></div>
+  </section>
+
+  <!-- BORING STUFF -->
+  <section id="boring" class="section">
+    <div class="section-title">BORING STUFF</div>
+    <div class="boring-grid" id="boring-grid"></div>
+  </section>
+
+  <!-- DIARY (placeholder) -->
+  <section id="diary" class="section">
+    <div class="section-title">DEVELOP</div>
+    <!-- New SOP Button Structure -->
+    <a href="social-sop.html" target="_blank" class="sop-btn">
+        <div class="sop-bubbles" id="sop-bubbles"></div>
+        <div class="sop-content">
+            <div class="sop-title">帶來幸福的社交SOP</div>
+            <div class="sop-subtitle">點擊體驗</div>
+        </div>
+    </a>
+    <a href="wts.html" target="_blank" class="wts-btn">
+        <div class="wts-content">
+            <div class="wts-title">WTS — What The Sound</div>
+            <div class="wts-subtitle">&gt; RUN CHORD.EXE_</div>
+        </div>
+    </a>
+  </section>
+
+  <!-- MORE -->
+  <section id="more" class="section">
+    <div class="section-title">AND MORE…</div>
+    <p style="text-align:center;font-weight:700;"><a id="email-link"></a></p>
+  </section>
+</main>
+
+<a class="top-link" href="#home">▲ Top</a>
+<div class="footer">THIS WEBSITE WAS MADE BY ©TRUEMORE</div>
+
+<script>
+// ===== Data =====
+const hero = {title:'TRUEMORE', subtitle:'ANIMATION DIRECTOR & CG GENERALIST', image:'https://i.imgur.com/lNQUzoi.jpeg'};
+function ytThumb(url){
+  const m = url && (url.match(/[?&]v=([\w-]{11})/) || url.match(/youtu\.be\/([\w-]{11})/));
+  return m ? `https://img.youtube.com/vi/${m[1]}/maxresdefault.jpg` : '';
+}
+// 專案清單（14 筆；順序不變。金馬卡片套用置頂裁切，不變動排序）
+const projects = [
+  {name:'亞洲電子競技公開賽', role:'ANIMATION DIRECTOR', url:'https://youtu.be/tXtDOLzmwvk'},
+  {name:'MSIology｜Dragonforged Dominance', role:'ANIMATION DIRECTOR', thumb:'https://i.postimg.cc/cLHgZWBm/2.jpg', url:'https://youtu.be/_pXLO7jGqDw'},
+  {name:'96分鐘', role:'ANIMATION DIRECTOR', url:'https://www.youtube.com/watch?v=55MGF0stYzk'},
+  {name:'2024金馬年度廣告', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Epiqjg5.jpeg', url:'https://www.youtube.com/watch?v=AknyAsiava4'},
+  {name:'台灣福斯商旅', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Ofu77yl.jpeg', url:'https://www.youtube.com/watch?v=OuzoLiM-cBU'},
+  {name:'雙吳推薦｜御茶園 真好茶', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/P8bvaEy.jpeg', url:'https://www.youtube.com/watch?v=ZaodEebzfrA'},
+  {name:'百齡罈40年｜大師之路系列', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/wjRVFEM.jpeg', url:'https://www.wepeople.club/tsai_ming_liang-ball...'},
+  {name:'動力火車 X 林俊傑｜俯衝的靈魂', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/zoiwWxv.jpeg', url:'https://www.youtube.com/watch?v=8zeXS7s7jok'},
+  {name:'潘朵拉｜命運先知', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/iL5IvXs.jpeg', url:'https://www.youtube.com/watch?v=WkuzC_axw-Q'},
+  {name:'亞培葡勝納｜戴資穎推薦', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/uFiG0jo.jpeg', url:'https://www.youtube.com/watch?v=zPu48_H1jc0'},
+  {name:'滅火器 X 戰酒黑金龍 Stronger Together', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/KidEcxY.jpeg', url:'https://www.youtube.com/watch?v=H1jLJC9iT1Q'},
+  {name:'格蘭利威年度大片｜創 新自我', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/5VhaPBo.jpeg', url:'https://www.youtube.com/watch?v=re7LJsYNTOw'},
+  {name:'46屆金穗獎｜對面 Home for Sale', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/4AO50Ow.jpeg', url:'https://ghsa.org.tw/gha/festival/film/1112'},
+  {name:'Claw A1M｜Grip and Game | MSI', role:'ANIMATION DIRECTOR', thumb:'https://i.imgur.com/Kyzf2R2.jpeg', url:'https://www.youtube.com/watch?v=AlKkHZD21BU'}
+];
+const boring = [
+  {name:'SCREEAAM', thumb:'https://i.postimg.cc/JH42Z219/A.png', url:'https://www.instagram.com/p/C60CLmAPdUy/?igsh=MW12bmYxNm42NXF1bg=='},
+  {name:"RIDER'S ON THE STONE", thumb:'https://i.postimg.cc/dLfxZ6zY/B.png', url:'https://www.instagram.com/reel/CzbiKlSPUpA/?igsh=MThjdnF6NmR1aGNvZg=='},
+  {name:'PINKCHAIN', thumb:'https://i.postimg.cc/56rRQgDD/C.png', url:'https://www.instagram.com/p/C5znpsAP3De/?igsh=bW55bnJ0bG9pZ3J1'}
+];
+const email = 'truemore1309@gmail.com';
+
+// ===== Render =====
+// Hero
+const heroImg=document.getElementById('hero-img'); heroImg.src = hero.image;
+document.getElementById('hero-title').textContent = hero.title;
+document.getElementById('hero-sub').textContent = hero.subtitle;
+
+// Projects
+const pg = document.getElementById('projects-grid');
+pg.innerHTML = '';
+projects.forEach((p,i)=>{
+  const a=document.createElement('a');
+  a.className='project-card';
+  if(p.name && p.name.includes('金馬')){ a.classList.add('top-crop'); }
+  a.href=p.url||'#';
+  if(p.url) {a.target='_blank'; a.rel='noopener';}
+  const thumb = p.thumb || ytThumb(p.url) || hero.image;
+  const roleText = i>=2 ? 'CG GENERALIST' : (p.role||'');
+  a.innerHTML = `
+    <div class="thumb"><img src="${thumb}" alt="${p.name}"></div>
+    <div class="overlay"><div class="title">${p.name}</div><div class="role">${roleText}</div></div>
+  `;
+  if(i>3){ a.style.display='none'; a.classList.add('hidden-proj'); }
+  pg.appendChild(a);
+});
+
+// Add + button (color cycle twice on scroll into view)
+const moreBtn=document.createElement('div');
+moreBtn.textContent='+';
+moreBtn.style.background='transparent';
+moreBtn.style.border='none';
+moreBtn.style.color='white';
+moreBtn.style.fontWeight='900';
+moreBtn.style.fontSize='100px';
+moreBtn.style.cursor='pointer';
+moreBtn.style.lineHeight='1';
+moreBtn.style.display='block';
+moreBtn.style.textAlign='center';
+moreBtn.style.margin='20px auto';
+moreBtn.style.fontFamily='monospace';
+
+const colorStyle=document.createElement('style');
+colorStyle.textContent=`@keyframes colorCycle{0%{color:red}33%{color:yellow}66%{color:blue}100%{color:white}}`;
+document.head.appendChild(colorStyle);
+
+let animated=false;
+const btnObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && !animated){
+      moreBtn.style.animation='colorCycle 0.5s linear 2 forwards';
+      animated=true;
+    }
+  });
+},{threshold:0.5});
+btnObserver.observe(moreBtn);
+
+moreBtn.addEventListener('click',()=>{
+  document.querySelectorAll('.hidden-proj').forEach(el=>el.style.display='block');
+  moreBtn.remove();
+});
+pg.after(moreBtn);
+
+// Boring Stuff
+const bg = document.getElementById('boring-grid');
+bg.innerHTML='';
+boring.forEach(b=>{
+  const a=document.createElement('a');
+  a.className='boring-card';
+  a.href=b.url||'#';
+  if(b.url) {a.target='_blank'; a.rel='noopener';}
+  a.innerHTML = `
+    <div class="thumb"><img src="${b.thumb}" alt="${b.name}"></div>
+    <div class="overlay">${b.name}</div>
+  `;
+  bg.appendChild(a);
+});
+
+// Email
+const el = document.getElementById('email-link');
+el.href = `mailto:${email}`;
+el.textContent = email;
+
+// Reveal on scroll
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+},{threshold:0.1});
+
+document.querySelectorAll('.project-card,.boring-card').forEach(el=>observer.observe(el));
+
+// Init SOP button bubbles
+(function initSopBubbles(){
+    const container = document.getElementById('sop-bubbles');
+    if(!container) return;
+    const count = 20; // 增加泡泡數量
+    for(let i=0; i<count; i++){
+        const b = document.createElement('div');
+        b.className = 'sop-bubble';
+        const size = Math.random() * 40 + 10;
+        b.style.width = size + 'px';
+        b.style.height = size + 'px';
+        b.style.left = Math.random() * 100 + '%';
+        b.style.animationDuration = (Math.random() * 5 + 4) + 's';
+        b.style.animationDelay = (Math.random() * 5) + 's';
+        container.appendChild(b);
+    }
+})();
+
+// ===== Tests =====
+(function tests(){
+  const fail=(m)=>{console.error('[TEST FAIL]',m); const id='test-warn'; let b=document.getElementById(id); if(!b){b=document.createElement('div'); b.id=id; b.style.cssText='position:fixed;left:0;right:0;bottom:0;background:#b00020;color:#fff;padding:8px 12px;z-index:9999;font-size:12px;text-align:center'; b.textContent='Some tests failed. Open console for details.'; document.body.appendChild(b);} };
+
+  if(!Array.isArray(projects)||projects.length!==14) fail('expected 14 projects, got '+projects.length);
+  if(projects.some(p=>!p.url)) fail('one or more projects missing url');
+  if(!projects.some(p=> (p.name||'').includes('金馬'))) fail('金馬 project missing');
+})();
+</script>
+</body>
+</html>
