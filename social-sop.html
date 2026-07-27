@@ -303,6 +303,23 @@
     background:rgba(255,255,255,.65);
     transform:translateX(-3px);color:#e84393;
   }
+  /* 每 10 秒閃一次的粉色光暈。做在 ::after 上而不是按鈕本身，
+     這樣 hover 的背景與文字色才不會被動畫的優先權蓋掉。 */
+  .home-btn::after{
+    content:'';
+    position:absolute;inset:-3px;
+    border-radius:99px;
+    pointer-events:none;
+    opacity:0;
+    box-shadow:0 0 0 2px rgba(232,67,147,.5),0 0 20px 4px rgba(232,67,147,.42);
+    animation:home-btn-pulse 10s ease-in-out infinite;
+  }
+  @keyframes home-btn-pulse{
+    0%,88%,100%{opacity:0}
+    91%{opacity:1}
+    94%{opacity:0}
+    97%{opacity:1}
+  }
 
   @media (max-width:520px){
     .wrap{padding:82px 14px 44px}
