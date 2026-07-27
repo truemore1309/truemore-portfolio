@@ -43,8 +43,18 @@
     font-size:20px;
     letter-spacing:.05em;
     transition:all .15s;
+    animation:home-btn-blink 10s ease-in-out infinite;
   }
-  .home-btn:hover{border-color:var(--fg);color:var(--fg);box-shadow:0 0 8px var(--fg-dim)}
+  .home-btn:hover{border-color:var(--fg);color:var(--fg);box-shadow:0 0 8px var(--fg-dim);animation-play-state:paused}
+  /* quiet by default, flashes once near the end of every 10s cycle to catch a passerby's eye */
+  @keyframes home-btn-blink{
+    0%, 90%, 100%{opacity:1;box-shadow:none;border-color:var(--fg-dim);color:var(--fg-dim)}
+    92%, 96%{opacity:.25}
+    94%, 98%{opacity:1;box-shadow:0 0 10px var(--fg);border-color:var(--fg);color:var(--fg)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .home-btn{animation:none}
+  }
 
   .wrap{
     max-width:900px;margin:0 auto;

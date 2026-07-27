@@ -1,546 +1,721 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>帶來幸福的社交SOP</title>
-    <style>
-        /* --- 全局設定 --- */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
-            overflow: hidden;
-            /* 預設背景，平時會被泡泡覆蓋 */
-            background: linear-gradient(180deg, #ffd1ff 0%, #c4dafa 100%);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帶來幸福的社交SOP</title>
+<style>
+  :root{
+    --ink:#3d3a4e;
+    --ink-soft:#6b6780;
+    --ink-faint:#9a96ab;
+    --glass:rgba(255,255,255,.42);
+    --glass-line:rgba(255,255,255,.7);
+    --pink:#ff758c;
+    --pink-deep:#e8557a;
+    --blue:#8fa8e8;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;width:100%;min-height:100%;
+    font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
+    background:linear-gradient(180deg,#ffd1ff 0%,#c4dafa 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+  }
 
-        /* --- 背景容器 (放泡泡用的) --- */
-        #background-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            overflow: hidden;
-            pointer-events: none;
-        }
+  /* 結果用的主題底色，蓋在預設漸層之上、泡泡之下 */
+  #theme-layer{
+    position:fixed;inset:0;z-index:0;
+    opacity:0;transition:opacity .9s ease;
+    pointer-events:none;
+  }
+  #background-container{
+    position:fixed;inset:0;z-index:1;
+    overflow:hidden;pointer-events:none;
+  }
+  .bubble{
+    position:absolute;bottom:-120px;
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.8),rgba(255,255,255,.1));
+    border-radius:50%;
+    box-shadow:0 0 15px rgba(255,255,255,.5);
+    border:1px solid rgba(255,255,255,.3);
+    animation:floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(1);opacity:0}
+    10%{opacity:.9}
+    100%{transform:translateY(-120vh) scale(1.1);opacity:0}
+  }
 
-        /* --- 碎紙花容器 (放歡樂動畫用的) --- */
-        #confetti-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20; /* 比卡片更高層級 */
-            overflow: hidden;
-            pointer-events: none; /* 不阻擋點擊 */
-            display: none; /* 預設隱藏 */
-        }
+  #confetti-container{
+    position:fixed;inset:0;z-index:30;
+    overflow:hidden;pointer-events:none;display:none;
+  }
+  .confetti{position:absolute;opacity:.85}
+  @keyframes confettiFall{
+    0%{transform:translateY(-10vh) rotate(0deg);opacity:1}
+    100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+  }
 
-        /* --- 泡泡動畫基礎設定 --- */
-        .bubble {
-            position: absolute;
-            bottom: -100px;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            animation: floatUp linear infinite;
-            z-index: 2;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
+  /* --- 版面 --- */
+  .wrap{
+    position:relative;z-index:10;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:96px 20px 56px;
+  }
+  .card{
+    background:var(--glass);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-line);
+    box-shadow:0 8px 32px rgba(31,38,135,.15);
+    border-radius:26px;
+    padding:38px 34px;
+    width:100%;max-width:620px;
+  }
+  .fade-in{animation:fadeIn .5s cubic-bezier(.22,1,.36,1)}
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(18px) scale(.97)}
+    to{opacity:1;transform:none}
+  }
 
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            10% { opacity: 0.9; }
-            100% { transform: translateY(-120vh) scale(1.1); opacity: 0; }
-        }
+  /* --- 開場 --- */
+  .eyebrow{
+    font-size:.82rem;letter-spacing:.18em;
+    color:var(--ink-faint);text-transform:uppercase;
+    margin-bottom:12px;text-align:center;
+  }
+  h1{
+    font-size:1.85rem;line-height:1.35;margin:0 0 16px;
+    text-align:center;letter-spacing:-.01em;
+  }
+  .lede{
+    font-size:1.02rem;line-height:1.85;color:var(--ink-soft);
+    text-align:center;margin:0 0 26px;
+  }
+  .lede strong{color:var(--ink);font-weight:700}
 
-        /* --- 碎紙花動畫設定 (聊天用) --- */
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            opacity: 0.8;
-        }
+  .howto{
+    background:rgba(255,255,255,.38);
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:16px;
+    padding:18px 20px;margin-bottom:28px;
+  }
+  .howto-title{
+    font-size:.86rem;font-weight:700;letter-spacing:.06em;
+    color:var(--ink-soft);margin-bottom:12px;
+  }
+  .howto-item{
+    display:flex;gap:11px;align-items:flex-start;
+    font-size:.95rem;line-height:1.65;color:var(--ink-soft);
+  }
+  .howto-item+.howto-item{margin-top:11px}
+  .howto-item b{color:var(--ink);font-weight:700}
+  .howto-dot{
+    flex:0 0 auto;width:7px;height:7px;border-radius:50%;
+    background:var(--pink);margin-top:.55em;
+  }
 
-        @keyframes confettiFall {
-            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
+  /* --- 進度 --- */
+  .progress-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:.84rem;color:var(--ink-faint);letter-spacing:.06em;
+    margin-bottom:10px;
+  }
+  .progress-rail{
+    height:5px;border-radius:99px;
+    background:rgba(255,255,255,.5);
+    overflow:hidden;margin-bottom:30px;
+  }
+  .progress-fill{
+    height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--pink),var(--blue));
+    transition:width .45s cubic-bezier(.22,1,.36,1);
+  }
 
-        /* --- 【新增】平靜流動動畫設定 (平靜用) --- */
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+  /* --- 題目 --- */
+  .q-title{
+    font-size:1.42rem;line-height:1.45;font-weight:700;
+    margin:0 0 12px;
+  }
+  .q-help{
+    font-size:.94rem;line-height:1.7;color:var(--ink-soft);
+    background:rgba(255,255,255,.34);
+    border-left:3px solid var(--pink);
+    border-radius:0 12px 12px 0;
+    padding:11px 15px;margin:0 0 24px;
+  }
+  .q-help b{color:var(--ink)}
 
-        /* --- 遊戲主容器 --- */
-        #game-container {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            /* 讓容器可捲動，解決手機版內容被切掉的問題 */
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            
-            display: flex;
-            flex-direction: column;
-            /* 使用 min-height 搭配 justify-content，確保內容少時置中，多時可捲動 */
-            justify-content: center; 
-            align-items: center;
-        }
+  .opts{display:flex;flex-direction:column;gap:12px}
+  .opt{
+    display:block;width:100%;text-align:left;
+    background:rgba(255,255,255,.55);
+    border:1.5px solid rgba(255,255,255,.75);
+    border-radius:16px;
+    padding:16px 18px;
+    cursor:pointer;
+    transition:transform .18s,box-shadow .18s,background .18s,border-color .18s;
+    font-family:inherit;color:inherit;
+  }
+  .opt:hover{
+    background:rgba(255,255,255,.82);
+    border-color:var(--pink);
+    transform:translateY(-2px);
+    box-shadow:0 8px 22px rgba(255,117,140,.22);
+  }
+  .opt:active{transform:translateY(0)}
+  .opt-label{
+    font-size:1.06rem;font-weight:700;margin-bottom:4px;
+    display:flex;align-items:center;gap:9px;
+  }
+  .opt-emoji{font-size:1.15rem;line-height:1}
+  .opt-desc{font-size:.9rem;line-height:1.6;color:var(--ink-soft)}
 
-        /* 當內容高度超過視窗時，讓 flex item 能夠正常延展 */
-        #game-container::before, #game-container::after {
-            content: '';
-            flex-shrink: 0;
-            height: 40px; /* 上下留白 */
-        }
+  .nav-row{margin-top:22px;text-align:center}
+  .link-btn{
+    background:none;border:none;cursor:pointer;
+    font-family:inherit;font-size:.92rem;
+    color:var(--ink-faint);letter-spacing:.04em;
+    padding:8px 14px;border-radius:99px;transition:.2s;
+  }
+  .link-btn:hover{color:var(--ink);background:rgba(255,255,255,.45)}
 
-        /* --- 卡片樣式 (一般問題模式) --- */
-        .card {
-            background: rgba(255, 255, 255, 0.35); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            
-            padding: 40px;
-            border-radius: 24px;
-            max-width: 600px;
-            width: 90%; /* 手機版留邊 */
-            text-align: center;
-            transition: all 0.5s ease;
-            position: relative;
-            flex-shrink: 0; /* 防止被壓縮 */
-            margin: auto; /* 關鍵：讓 flex item 在溢出時能正確置中 */
-        }
+  /* --- 結果 --- */
+  .verdict-badge{
+    display:inline-block;
+    font-size:.8rem;font-weight:700;letter-spacing:.14em;
+    padding:7px 16px;border-radius:99px;
+    background:rgba(255,255,255,.6);
+    margin-bottom:16px;
+  }
+  .result-head{text-align:center;margin-bottom:26px}
+  .result-title{font-size:1.95rem;line-height:1.35;font-weight:800;margin:0 0 12px}
+  .result-sub{font-size:1.02rem;line-height:1.8;color:var(--ink-soft);margin:0}
 
-        /* --- 滿版樣式 (結果模式通用) --- */
-        .card.fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            max-width: none;
-            border-radius: 0;
-            border: none;
-            box-shadow: none;
-            
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* 移除 justify-content: center 以避免截斷 */
-            justify-content: flex-start; 
-            
-            padding: 80px 20px 40px; /* 上方留空間給 Home 按鈕 */
-            z-index: 15;
-            
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
-        }
+  .score-line{
+    display:flex;align-items:baseline;justify-content:center;
+    gap:8px;margin-bottom:6px;
+  }
+  .score-num{font-size:3.1rem;font-weight:800;line-height:1}
+  .score-max{font-size:1rem;color:var(--ink-faint);font-weight:700}
 
-        /* 使用偽元素輔助垂直置中 (當內容少時) */
-        .card.fullscreen::before {
-            content: '';
-            display: block;
-            flex-shrink: 0;
-            height: auto;
-            flex-grow: 1; /* 推擠內容向下 */
-            min-height: 20px;
-        }
-        .card.fullscreen::after {
-            content: '';
-            display: block;
-            flex-shrink: 0;
-            height: auto;
-            flex-grow: 1; /* 推擠內容向上 */
-            min-height: 20px;
-        }
+  .breakdown{
+    background:rgba(255,255,255,.38);
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:18px;padding:20px;margin:26px 0;
+  }
+  .breakdown-title{
+    font-size:.86rem;font-weight:700;letter-spacing:.06em;
+    color:var(--ink-soft);margin-bottom:16px;
+  }
+  .bd-row{display:flex;align-items:center;gap:12px}
+  .bd-row+.bd-row{margin-top:13px}
+  .bd-name{
+    flex:0 0 78px;font-size:.9rem;font-weight:700;
+  }
+  .bd-rail{
+    flex:1;height:8px;border-radius:99px;
+    background:rgba(255,255,255,.55);overflow:hidden;
+  }
+  /* min-width 讓 0 分的項目仍看得到紅色，不會變成一條空軌 */
+  .bd-fill{height:100%;border-radius:99px;transition:width .6s ease;min-width:10px}
+  .bd-fill.s2{background:linear-gradient(90deg,#7ed6a5,#5bc48a)}
+  .bd-fill.s1{background:linear-gradient(90deg,#ffd88a,#ffc65c)}
+  .bd-fill.s0{background:linear-gradient(90deg,#ff9fb0,#ff7591)}
+  .bd-tag{
+    flex:0 0 auto;font-size:.82rem;color:var(--ink-faint);
+    min-width:58px;text-align:right;
+  }
+  .bd-note{
+    margin-top:16px;padding-top:15px;
+    border-top:1px dashed rgba(255,255,255,.7);
+    font-size:.92rem;line-height:1.7;color:var(--ink-soft);
+  }
+  .bd-note b{color:var(--ink)}
 
-        /* 內容容器 (如果有的話) 或直接對子元素微調 */
-        .card.fullscreen > * {
-            flex-shrink: 0; /* 防止子元素被壓縮 */
-        }
+  /* 話術卡 */
+  .scripts{margin:26px 0 8px}
+  .scripts-title{
+    font-size:1.08rem;font-weight:700;margin-bottom:6px;
+  }
+  .scripts-hint{
+    font-size:.9rem;line-height:1.65;color:var(--ink-soft);margin:0 0 16px;
+  }
+  .script{
+    background:rgba(255,255,255,.58);
+    border:1px solid rgba(255,255,255,.75);
+    border-radius:16px;padding:16px 18px;
+  }
+  .script+.script{margin-top:12px}
+  .script-tag{
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;
+    color:var(--pink-deep);margin-bottom:8px;
+  }
+  .script-body{
+    font-size:1rem;line-height:1.75;margin:0 0 14px;
+  }
+  .copy-btn{
+    background:rgba(255,117,140,.92);color:#fff;
+    border:1px solid rgba(255,255,255,.4);
+    border-radius:11px;padding:9px 18px;
+    font-family:inherit;font-size:.88rem;font-weight:700;
+    cursor:pointer;transition:.2s;
+  }
+  .copy-btn:hover{background:var(--pink-deep)}
+  .copy-btn.done{background:#5bc48a}
 
-        /* 手機版滿版調整 */
-        @media (max-height: 600px) {
-            .card.fullscreen {
-                padding-top: 60px; /* 小螢幕上方留白稍微減少 */
-            }
-        }
+  .cta-row{
+    display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+    margin-top:30px;
+  }
+  .btn{
+    flex:1 1 190px;max-width:280px;
+    background:rgba(255,117,140,.92);color:#fff;
+    border:1px solid rgba(255,255,255,.4);
+    padding:16px 22px;border-radius:16px;
+    font-family:inherit;font-size:1rem;font-weight:700;
+    cursor:pointer;transition:.2s;
+    box-shadow:0 4px 15px rgba(255,117,140,.3);
+  }
+  .btn:hover{background:var(--pink-deep);transform:translateY(-2px);box-shadow:0 7px 22px rgba(255,117,140,.42)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{
+    background:rgba(255,255,255,.5);color:var(--ink);
+    box-shadow:0 4px 15px rgba(31,38,135,.08);
+  }
+  .btn.ghost:hover{background:rgba(255,255,255,.78)}
 
-        /* --- 特殊結果背景設定 --- */
-        
-        /* 【修改】平靜結果背景：加入柔和流動動畫 */
-        .card.fullscreen.theme-calm {
-             /* 使用柔和的紫藍色漸層，並設定為 200% 大小以便移動 */
-             background: linear-gradient(135deg, rgba(209, 196, 233, 0.9) 0%, rgba(179, 229, 252, 0.9) 100%);
-             background-size: 200% 200%;
-             backdrop-filter: blur(10px);
-             /* 套用緩慢流動的動畫 */
-             animation: gradientShift 15s ease infinite;
-        }
+  .home-btn{
+    position:fixed;top:26px;left:26px;z-index:100;
+    padding:12px 22px;
+    background:rgba(255,255,255,.28);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.45);
+    border-radius:99px;
+    color:#555;font-weight:700;font-size:.85rem;
+    text-decoration:none;letter-spacing:.05em;
+    transition:.3s;box-shadow:0 4px 15px rgba(0,0,0,.05);
+  }
+  .home-btn:hover{
+    background:rgba(255,255,255,.65);
+    transform:translateX(-3px);color:#e84393;
+  }
 
-        /* 聊天結果背景 (充滿幸福的粉紅色) */
-        .card.fullscreen.theme-chat {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffd1ff 100%);
-        }
-
-        /* 標題與文字 */
-        .card h2 {
-            color: #4a4a4a;
-            margin-bottom: 25px;
-            font-size: 1.6rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
-        }
-
-        .card p {
-            color: #555;
-            margin-bottom: 35px;
-            font-size: 1.1rem;
-            line-height: 1.7;
-            font-weight: 500;
-            max-width: 600px;
-        }
-
-        .card.fullscreen h2 {
-            font-size: 2.2rem;
-            margin-bottom: 30px;
-        }
-
-        /* --- 按鈕群組 --- */
-        .btn-group {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        /* --- 按鈕樣式 --- */
-        button {
-            flex: 1;
-            background: rgba(255, 117, 140, 0.9);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 16px 20px;
-            font-size: 1rem;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(255, 117, 140, 0.3);
-            white-space: normal;
-            line-height: 1.4;
-            min-width: 120px;
-        }
-
-        button:hover {
-            background: rgba(255, 94, 120, 1);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 117, 140, 0.5);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        /* 次要按鈕 (再測一次) */
-        button.secondary {
-            background: rgba(166, 193, 238, 0.9);
-            box-shadow: 0 4px 15px rgba(166, 193, 238, 0.4);
-            max-width: 300px;
-        }
-        
-        button.secondary:hover {
-            background: rgba(132, 169, 229, 1);
-        }
-
-        /* --- 轉場動畫 --- */
-        .fade-in {
-            animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* --- RWD 手機版調整 --- */
-        @media (max-width: 480px) {
-            .btn-group {
-                flex-direction: column;
-                width: 100%;
-            }
-            .card {
-                padding: 30px 20px;
-            }
-            .card.fullscreen h2 {
-                font-size: 1.8rem;
-            }
-            .home-btn {
-                top: 15px; left: 15px;
-                padding: 8px 16px;
-                font-size: 0.8rem;
-            }
-        }
-
-        /* --- HOME BUTTON --- */
-        .home-btn {
-            position: fixed;
-            top: 30px;
-            left: 30px;
-            z-index: 100;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 99px;
-            color: #555;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .home-btn:hover {
-            background: rgba(255, 255, 255, 0.6);
-            transform: translateX(-3px);
-            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.15);
-            color: #e84393;
-        }
-    </style>
+  @media (max-width:520px){
+    .wrap{padding:82px 14px 44px}
+    .card{padding:28px 22px;border-radius:22px}
+    h1{font-size:1.55rem}
+    .q-title{font-size:1.24rem}
+    .result-title{font-size:1.6rem}
+    .score-num{font-size:2.6rem}
+    .bd-name{flex-basis:64px;font-size:.85rem}
+    .bd-tag{min-width:48px;font-size:.78rem}
+    .home-btn{top:14px;left:14px;padding:9px 16px;font-size:.78rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+</style>
 </head>
 <body>
 
-    <div id="background-container"></div>
-    <div id="confetti-container"></div>
+<div id="theme-layer"></div>
+<div id="background-container"></div>
+<div id="confetti-container"></div>
 
-    <!-- Home Button -->
-    <a href="index.html" class="home-btn">← BACK TO TRUEMORE</a>
+<a href="index.html" class="home-btn">← BACK TO TRUEMORE</a>
 
-    <div id="game-container">
-        <div id="card" class="card fade-in">
-            </div>
-    </div>
+<div class="wrap">
+  <div id="card" class="card fade-in"></div>
+</div>
 
-    <script>
-        // --- 泡泡背景生成 (常駐) ---
-        function createBubbles() {
-            const container = document.getElementById('background-container');
-            const bubbleCount = 30; 
-            for (let i = 0; i < bubbleCount; i++) {
-                const bubble = document.createElement('div');
-                bubble.classList.add('bubble');
-                const size = Math.random() * 80 + 20; 
-                bubble.style.width = `${size}px`;
-                bubble.style.height = `${size}px`;
-                bubble.style.left = `${Math.random() * 100}%`;
-                const duration = Math.random() * 8 + 6; 
-                const delay = Math.random() * 5;
-                bubble.style.animationDuration = `${duration}s`;
-                bubble.style.animationDelay = `${delay}s`;
-                container.appendChild(bubble);
-            }
-        }
-        createBubbles();
+<script>
+(function(){
+  // ---- 背景泡泡 ----
+  const bgContainer = document.getElementById('background-container');
+  for(let i = 0; i < 26; i++){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = Math.random() * 80 + 20;
+    b.style.width = b.style.height = size + 'px';
+    b.style.left = (Math.random() * 100) + '%';
+    b.style.animationDuration = (Math.random() * 8 + 6) + 's';
+    b.style.animationDelay = (Math.random() * 5) + 's';
+    bgContainer.appendChild(b);
+  }
 
-        // --- 歡樂碎紙花動畫控制 (聊天用) ---
-        const confettiContainer = document.getElementById('confetti-container');
-        let confettiInterval;
+  // ---- 碎紙花（只有最高分結果才放）----
+  const confettiContainer = document.getElementById('confetti-container');
+  function startConfetti(){
+    confettiContainer.style.display = 'block';
+    confettiContainer.innerHTML = '';
+    const colors = ['#ff5e57','#ffdd59','#05c46b','#0fbcf9','#e84393','#ffffff'];
+    for(let i = 0; i < 130; i++){
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = (Math.random() * 100) + '%';
+      c.style.width = (Math.random() * 12 + 6) + 'px';
+      c.style.height = (Math.random() * 12 + 6) + 'px';
+      c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animation = 'confettiFall ' + (Math.random() * 4 + 3) + 's linear infinite ' + (Math.random() * 3) + 's';
+      confettiContainer.appendChild(c);
+    }
+  }
+  function stopConfetti(){
+    confettiContainer.style.display = 'none';
+    confettiContainer.innerHTML = '';
+  }
 
-        function startConfetti() {
-            confettiContainer.style.display = 'block';
-            confettiContainer.innerHTML = ''; 
+  const themeLayer = document.getElementById('theme-layer');
+  function setTheme(gradient){
+    if(!gradient){ themeLayer.style.opacity = '0'; return; }
+    themeLayer.style.background = gradient;
+    themeLayer.style.opacity = '1';
+  }
 
-            const colors = ['#ff5e57', '#ffdd59', '#05c46b', '#0fbcf9', '#d63031', '#e84393', '#ffffff'];
+  // ---- 題目 ----
+  // 每題都是獨立面向、各自計分（0/1/2），不再用樹狀分支：
+  // 分支圖只要答錯一題就會被導去無關的結局，而計分能同時表達
+  // 「該不該去」和「這場社交的品質高低」，也讓每題可以獨立問清楚。
+  const QUESTIONS = [
+    {
+      axis: '對象',
+      title: '跟這個人相處完，你通常是什麼狀態？',
+      help: '想一下<b>上次跟對方結束</b>的那一刻 —— 你是還想再多聊一下，還是只想趕快回家躺平？',
+      options: [
+        { emoji:'🔋', label:'充電', desc:'聊完覺得輕鬆，甚至有點意猶未盡', score:2 },
+        { emoji:'😐', label:'還好', desc:'不特別累，但也沒有特別期待', score:1 },
+        { emoji:'🪫', label:'耗電', desc:'結束後需要一段獨處才能恢復', score:0 }
+      ]
+    },
+    {
+      axis: '目的',
+      title: '這場社交要幹嘛，你清楚嗎？',
+      help: '如果你答不出「等一下到底要做什麼」，那是<b>對方還沒講清楚</b>，不是你想太多。',
+      options: [
+        { emoji:'🎈', label:'清楚，而且是輕鬆的', desc:'吃飯、看展、打電動之類，一起做喜歡的事', score:2 },
+        { emoji:'📋', label:'清楚，有事要辦', desc:'有明確主題，談完就結束，看得到終點', score:1 },
+        { emoji:'🌫️', label:'不清楚，或是要聽情緒垃圾', desc:'沒說要幹嘛，或這場的功能是讓對方發洩', score:0 }
+      ]
+    },
+    {
+      axis: '電量',
+      title: '你今天的社交電量還剩多少？',
+      help: '不是問你累不累，是問：<b>再跟人講一小時的話</b>，現在對你來說難不難。',
+      options: [
+        { emoji:'🌤️', label:'滿格', desc:'今天幾乎沒跟人互動，還有力氣', score:2 },
+        { emoji:'⛅', label:'一半', desc:'撐得住，但不想待太久', score:1 },
+        { emoji:'🌧️', label:'快沒電', desc:'現在光是回訊息都覺得費力', score:0 }
+      ]
+    },
+    {
+      axis: '退場',
+      title: '你能決定自己什麼時候離開嗎？',
+      help: '有退路的社交，壓力少一半；<b>沒有退路的，成本要算兩倍</b>。',
+      options: [
+        { emoji:'🚪', label:'可以', desc:'我想走就能走，不用特別解釋', score:2 },
+        { emoji:'🕰️', label:'大概可以', desc:'走得掉，但要找個像樣的理由', score:1 },
+        { emoji:'🔒', label:'不行', desc:'得待到散場，或要配合別人的時間', score:0 }
+      ]
+    },
+    {
+      axis: '後續',
+      title: '這場結束之後，你還有硬任務嗎？',
+      help: '社交的帳單常常是<b>隔天才寄來</b>的。先看看你付不付得起。',
+      options: [
+        { emoji:'🛋️', label:'沒有', desc:'之後可以慢慢恢復，睡到飽也沒差', score:2 },
+        { emoji:'📝', label:'有一點', desc:'有事，但不急，晚一點做也行', score:1 },
+        { emoji:'⚠️', label:'有重要的事', desc:'明天有不能出錯的事，不能被影響', score:0 }
+      ]
+    },
+    {
+      axis: '真心',
+      title: '如果對方現在說「今天取消」，你的第一反應是？',
+      help: '這題最誠實，<b>不要想太久</b>，第一個閃過的念頭就是答案。',
+      options: [
+        { emoji:'🥺', label:'有點失望', desc:'我其實還蠻期待的', score:2 },
+        { emoji:'🤷', label:'還好', desc:'沒差，都可以', score:1 },
+        { emoji:'😮‍💨', label:'鬆一口氣', desc:'太好了，終於不用去了', score:0 }
+      ]
+    }
+  ];
 
-            for (let i = 0; i < 150; i++) {
-                const confetti = document.createElement('div');
-                confetti.classList.add('confetti');
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.width = Math.random() * 12 + 6 + 'px';
-                confetti.style.height = Math.random() * 12 + 6 + 'px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                
-                const duration = Math.random() * 4 + 3; 
-                const delay = Math.random() * 3; 
-                confetti.style.animation = `confettiFall ${duration}s linear infinite ${delay}s`;
-                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                
-                confettiContainer.appendChild(confetti);
-            }
-        }
+  const MAX_SCORE = QUESTIONS.length * 2; // 12
 
-        function stopConfetti() {
-            confettiContainer.style.display = 'none';
-            confettiContainer.innerHTML = ''; 
-        }
+  // ---- 結果分級 ----
+  const TIERS = [
+    {
+      min: 10,
+      badge: '品質良好',
+      title: '這場值得去 🎉',
+      sub: '對象、時機、你的狀態都對上了。<br>這種場合不常有，好好享受它。',
+      theme: 'linear-gradient(135deg,#ff9a9e 0%,#fad0c4 50%,#ffd1ff 100%)',
+      confetti: true,
+      scriptsTitle: '出門前的小提醒',
+      scriptsHint: '就算是高品質社交，也還是會消耗體力。先想好離場時間，不是掃興，是讓你下次還想再約。',
+      scripts: [
+        { tag:'先講好，玩得更安心', body:'我今天大概可以待到 ＿＿，先跟你說一聲，這樣我可以放心玩不用一直看時間。' }
+      ]
+    },
+    {
+      min: 7,
+      badge: '可以去，但要設停損',
+      title: '去，但先講好幾點走',
+      sub: '整體是正面的，只是有一兩個地方會扣你的血。<br>先把離場時間講出來，這場就會舒服很多。',
+      theme: 'linear-gradient(135deg,#ffe6a7 0%,#ffd1dc 55%,#d9e4ff 100%)',
+      confetti: false,
+      scriptsTitle: '先說這句，等一下就不用硬撐',
+      scriptsHint: '把時間講在前面，對方會覺得你在尊重他；講在後面，才會像是在敷衍。',
+      scripts: [
+        { tag:'設好停損點', body:'我今天可以，但大概 ＿＿ 就要回去休息了。先講一下免得你以為我中途落跑是不想跟你聊。' },
+        { tag:'中途需要喘口氣時', body:'我出去吹個風五分鐘，馬上回來。' }
+      ]
+    },
+    {
+      min: 4,
+      badge: '品質普通',
+      title: '建議縮短，或直接改期',
+      sub: '這場社交現在的性價比不高。<br>不一定要拒絕，但用原本的規模去，你大概會後悔。',
+      theme: 'linear-gradient(135deg,#e8d5f2 0%,#d5dcf5 55%,#cfe4f0 100%)',
+      confetti: false,
+      scriptsTitle: '兩種說法，挑一個順口的',
+      scriptsHint: '改期不是拒絕。把「我想在有精神的時候見你」講出來，對方通常會很買單。',
+      scripts: [
+        { tag:'縮短版', body:'今天我狀態普通，可以見但只能待一下下。這樣你 OK 嗎？如果你想好好聊，我們改天可能更值得。' },
+        { tag:'改期版', body:'今天我狀態不太行，怕沒辦法好好跟你聊，有點浪費。要不要改成 ＿＿？我想在有精神的時候見你。' }
+      ]
+    },
+    {
+      min: 0,
+      badge: '今天不適合',
+      title: '這場現在對你是消耗',
+      sub: '你不需要更努力，你需要的是今天先跳過。<br>拒絕一次不會毀掉關係，硬撐到情緒爆掉才會。',
+      theme: 'linear-gradient(135deg,#d1c4e9 0%,#c5d8ee 55%,#b3e5fc 100%)',
+      confetti: false,
+      scriptsTitle: '直接複製，貼上就能傳',
+      scriptsHint: '三句都有先照顧到對方的感受。重點是：<b>說明狀態，但不需要提出證明</b>。你不欠任何人一份診斷書。',
+      scripts: [
+        { tag:'最短版', body:'今天我狀態不太行，先不去了。不是你的問題，我需要一點時間充電，下次我主動找你。' },
+        { tag:'想保住關係的版本', body:'這次先跳過，但我是真的想見你。這幾天我會比較有精神，到時候我來約你，可以嗎？' },
+        { tag:'對方就在旁邊、你們一起測的版本', body:'你看，SOP 說我今天只有 {score} 分（滿分 {max}）。不是我不想跟你出去，是我今天真的沒電了。' }
+      ]
+    }
+  ];
 
+  function tierFor(score){
+    return TIERS.find(t => score >= t.min);
+  }
 
-        // --- 節點資料 ---
-        const nodes = {
-            intro: {
-                title: "帶來幸福的社交 SOP",
-                desc: "生活充斥著難以避免的社交嗎？<br>邀請想與你社交的對象，一起評估你是否能維持內心平靜吧。",
-                options: [
-                    { text: "開始評估", next: "q_small_talk" }
-                ]
-            },
-            q_small_talk: {
-                title: "是閒聊嗎？",
-                desc: "確認對話的性質是輕鬆的還是嚴肅的。",
-                options: [
-                    { text: "不是，有正事", next: "q_my_fault" },
-                    { text: "是，只是閒聊", next: "q_scolded" } 
-                ]
-            },
-            q_scolded: {
-                title: "有人會被罵嗎？",
-                desc: "預判這場對話的氣氛走向...",
-                options: [
-                    { text: "沒有人被罵", next: "q_tired" },
-                    { text: "有，對方想要發牢騷放鬆", next: "res_calm" }
-                ]
-            },
-            q_my_fault: {
-                title: "是我造成的嗎？",
-                desc: "關於事情的起因與責任...",
-                options: [
-                    { text: "不是我", next: "res_calm" },
-                    { text: "是我造成的", next: "q_meds" }
-                ]
-            },
-            q_tired: {
-                title: "我現在累嗎？",
-                desc: "誠實面對自己的能量狀態。",
-                options: [
-                    { text: "有點累了", next: "res_calm" },
-                    { text: "我不累", next: "res_chat" }
-                ]
-            },
-            q_meds: {
-                title: "身心狀態檢視",
-                desc: "對方或我有用藥，或精神不好嗎？",
-                options: [
-                    { text: "狀態欠佳", next: "res_calm" },
-                    { text: "狀況良好", next: "q_trouble" }
-                ]
-            },
-            q_trouble: {
-                title: "如果不討論的話...",
-                desc: "對方會因此感到很困擾嗎？",
-                options: [
-                    { text: "不會困擾", next: "res_calm" },
-                    { text: "會很困擾", next: "res_chat" }
-                ]
-            },
-            // --- 結果頁面 ---
-            res_calm: {
-                type: "result",
-                theme: "calm",
-                title: "✨ 我想保持內心平靜 ✨",
-                desc: "現在可能不是社交的最佳時機。<br>保護自己的能量，禮貌地結束或延後對話，讓自己回到平靜的狀態。<br><br><span style='font-size:0.9em; color:#666; font-weight:normal;'>記得禮貌地告訴對方，不是他的問題，而是你現在想好好休息喔~</span>",
-                options: [
-                    { text: "再測一次", next: "intro", style: "secondary" }
-                ]
-            },
-            res_chat: {
-                type: "result",
-                theme: "chat",
-                title: "🎉 那來聊天吧！ 🎉",
-                desc: "現在的狀態很適合交流！<br>享受這場對話，或許會有意想不到的收穫喔。",
-                options: [
-                    { text: "再測一次", next: "intro", style: "secondary" }
-                ]
-            }
+  // ---- 狀態 ----
+  const card = document.getElementById('card');
+  let answers = []; // 每題選到的 score
+
+  function swap(build){
+    stopConfetti();
+    card.innerHTML = '';
+    card.classList.remove('fade-in');
+    void card.offsetWidth; // 觸發 reflow 讓動畫能重播
+    card.classList.add('fade-in');
+    build();
+  }
+
+  function el(tag, cls, html){
+    const n = document.createElement(tag);
+    if(cls) n.className = cls;
+    if(html !== undefined) n.innerHTML = html;
+    return n;
+  }
+
+  // ---- 開場 ----
+  function renderIntro(){
+    answers = [];
+    setTheme(null);
+    swap(() => {
+      card.appendChild(el('div','eyebrow','SOCIAL SOP'));
+      card.appendChild(el('h1','','帶來幸福的社交 SOP'));
+      card.appendChild(el('p','lede',
+        '這不是要你變得更會社交。<br>' +
+        '它幫你在三十秒內看清楚：這場社交現在對你是<strong>補血</strong>還是<strong>扣血</strong>，' +
+        '然後給你一句<strong>能直接說出口的理由</strong>。'
+      ));
+
+      const howto = el('div','howto');
+      howto.appendChild(el('div','howto-title','怎麼用'));
+      [
+        '<b>一個人測：</b>誠實回答就好，結果只有你看得到，沒有人會評分你。',
+        '<b>兩個人一起測：</b>把螢幕轉向對方，讓流程圖當壞人 ——「不是我不想，是 SOP 說我今天不行。」',
+        '<b>沒有標準答案。</b>每題都會附上判斷方式，選最接近的那個就對了。'
+      ].forEach(t => {
+        const row = el('div','howto-item');
+        row.appendChild(el('span','howto-dot'));
+        row.appendChild(el('span','',t));
+        howto.appendChild(row);
+      });
+      card.appendChild(howto);
+
+      const cta = el('div','cta-row');
+      const start = el('button','btn','開始評估（6 題，約 30 秒）');
+      start.onclick = () => renderQuestion(0);
+      cta.appendChild(start);
+      card.appendChild(cta);
+    });
+  }
+
+  // ---- 題目 ----
+  function renderQuestion(index){
+    const q = QUESTIONS[index];
+    swap(() => {
+      const head = el('div','progress-head');
+      head.appendChild(el('span','','第 ' + (index + 1) + ' / ' + QUESTIONS.length + ' 題'));
+      head.appendChild(el('span','',q.axis));
+      card.appendChild(head);
+
+      const rail = el('div','progress-rail');
+      const fill = el('div','progress-fill');
+      fill.style.width = (index / QUESTIONS.length * 100) + '%';
+      rail.appendChild(fill);
+      card.appendChild(rail);
+      // 下一幀再推進，讓寬度變化有動畫可看
+      requestAnimationFrame(() => {
+        fill.style.width = ((index + 1) / QUESTIONS.length * 100) + '%';
+      });
+
+      card.appendChild(el('h2','q-title',q.title));
+      card.appendChild(el('p','q-help',q.help));
+
+      const opts = el('div','opts');
+      q.options.forEach(o => {
+        const btn = el('button','opt');
+        const label = el('div','opt-label');
+        label.appendChild(el('span','opt-emoji',o.emoji));
+        label.appendChild(el('span','',o.label));
+        btn.appendChild(label);
+        btn.appendChild(el('div','opt-desc',o.desc));
+        btn.onclick = () => {
+          answers[index] = o.score;
+          if(index + 1 < QUESTIONS.length) renderQuestion(index + 1);
+          else renderResult();
         };
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
 
-        const card = document.getElementById('card');
+      const nav = el('div','nav-row');
+      const back = el('button','link-btn', index === 0 ? '← 回開頭' : '← 上一題');
+      back.onclick = () => { index === 0 ? renderIntro() : renderQuestion(index - 1); };
+      nav.appendChild(back);
+      card.appendChild(nav);
+    });
+  }
 
-        function renderNode(nodeKey) {
-            const node = nodes[nodeKey];
-            
-            // 1. 清理工作：停止所有特殊動畫，移除舊 class
-            stopConfetti();
-            card.classList.remove('fullscreen', 'theme-calm', 'theme-chat');
-            // 移除可能存在的行內樣式動畫(以防萬一)
-            card.style.animation = ''; 
-            
-            // 2. 重置卡片內容與轉場動畫
-            card.innerHTML = '';
-            card.classList.remove('fade-in');
-            void card.offsetWidth; // Trigger reflow
-            card.classList.add('fade-in');
+  // ---- 結果 ----
+  function renderResult(){
+    const score = answers.reduce((a,b) => a + b, 0);
+    const tier = tierFor(score);
+    setTheme(tier.theme);
 
-            // 3. 判斷是否為結果頁面，並套用對應樣式與動畫
-            if (node.type === 'result') {
-                card.classList.add('fullscreen');
-                // 加上主題 class 以便 CSS 變更背景色
-                card.classList.add(`theme-${node.theme}`);
+    swap(() => {
+      const head = el('div','result-head');
+      head.appendChild(el('div','verdict-badge',tier.badge));
 
-                // 如果是聊天結果，啟動歡樂動畫
-                if (node.theme === 'chat') {
-                    startConfetti();
-                }
-                // 如果是平靜結果，CSS 會自動套用 gradientShift 動畫
-            }
+      const line = el('div','score-line');
+      line.appendChild(el('span','score-num',String(score)));
+      line.appendChild(el('span','score-max','/ ' + MAX_SCORE));
+      head.appendChild(line);
 
-            // 4. 建立標題與內容
-            const h2 = document.createElement('h2');
-            h2.innerHTML = node.title;
-            if (node.type === 'result') {
-                // 結果頁標題顏色微調
-                h2.style.color = node.theme === 'calm' ? '#8e44ad' : '#ff5e57';
-            }
-            card.appendChild(h2);
+      head.appendChild(el('h2','result-title',tier.title));
+      head.appendChild(el('p','result-sub',tier.sub));
+      card.appendChild(head);
 
-            if (node.desc) {
-                const p = document.createElement('p');
-                p.innerHTML = node.desc;
-                card.appendChild(p);
-            }
+      // 分數拆解：讓「評估品質」看得見，而不是一個黑箱結論
+      const bd = el('div','breakdown');
+      bd.appendChild(el('div','breakdown-title','這場社交的六個面向'));
+      const weak = [];
+      QUESTIONS.forEach((q,i) => {
+        const s = answers[i];
+        if(s === 0) weak.push(q.axis);
+        const row = el('div','bd-row');
+        row.appendChild(el('div','bd-name',q.axis));
+        const r = el('div','bd-rail');
+        const f = el('div','bd-fill s' + s);
+        f.style.width = (s / 2 * 100) + '%';
+        r.appendChild(f);
+        row.appendChild(r);
+        row.appendChild(el('div','bd-tag',['要注意','普通','良好'][s]));
+        bd.appendChild(row);
+      });
+      let note;
+      if(weak.length === 0){
+        note = '六個面向都沒有明顯扣分，這是一場條件很齊全的社交。';
+      } else if(weak.length >= 5){
+        note = '<b>幾乎每個面向都在扣分。</b>這不是你不夠努力，是這場社交本身現在就不適合 —— 今天先跳過，不需要覺得抱歉。';
+      } else {
+        note = '主要扣分在 <b>' + weak.join('、') + '</b>。如果要提高這場的品質，先動這幾項 —— 例如換個時間、問清楚要幹嘛，或先講好幾點離開。';
+      }
+      bd.appendChild(el('div','bd-note',note));
+      card.appendChild(bd);
 
-            // 5. 建立按鈕
-            const btnGroup = document.createElement('div');
-            btnGroup.className = 'btn-group';
+      // 話術
+      const wrap = el('div','scripts');
+      wrap.appendChild(el('div','scripts-title',tier.scriptsTitle));
+      wrap.appendChild(el('p','scripts-hint',tier.scriptsHint));
+      tier.scripts.forEach(s => {
+        // 話術裡的 {score}/{max} 用實際分數填掉，顯示與複製共用同一份文字
+        const body = s.body.replace(/\{score\}/g, score).replace(/\{max\}/g, MAX_SCORE);
+        const box = el('div','script');
+        box.appendChild(el('div','script-tag',s.tag));
+        box.appendChild(el('p','script-body',body));
+        const cp = el('button','copy-btn','複製這句');
+        cp.onclick = () => copyText(body, cp);
+        box.appendChild(cp);
+        wrap.appendChild(box);
+      });
+      card.appendChild(wrap);
 
-            node.options.forEach(option => {
-                const btn = document.createElement('button');
-                btn.innerText = option.text;
-                if (option.style === 'secondary') {
-                    btn.classList.add('secondary');
-                }
-                
-                btn.onclick = () => {
-                    renderNode(option.next);
-                };
-                btnGroup.appendChild(btn);
-            });
+      const cta = el('div','cta-row');
+      const again = el('button','btn','再測一次');
+      again.onclick = renderIntro;
+      const back = el('button','btn ghost','看上一題');
+      back.onclick = () => renderQuestion(QUESTIONS.length - 1);
+      cta.appendChild(again);
+      cta.appendChild(back);
+      card.appendChild(cta);
 
-            card.appendChild(btnGroup);
-        }
+      if(tier.confetti) startConfetti();
+      card.scrollIntoView({ block:'start', behavior:'smooth' });
+    });
+  }
 
-        // 啟動遊戲
-        renderNode('intro');
+  // 手機瀏覽器對 clipboard API 的支援差異大，失敗時退回隱藏 textarea 的老方法
+  function copyText(text, btn){
+    const done = () => {
+      const old = btn.textContent;
+      btn.textContent = '已複製 ✓';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1800);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, done){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly','');
+    ta.style.cssText = 'position:absolute;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){}
+    document.body.removeChild(ta);
+  }
 
-    </script>
+  renderIntro();
+})();
+</script>
 </body>
 </html>
