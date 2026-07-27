@@ -328,14 +328,14 @@
     transform:translateX(3px);
     white-space:nowrap;
   }
-  /* fixed-length grid: background lines are hardcoded to SEQ_PX_PER_BEAT(26px)/bar(104px) — keep in sync with the JS constant */
+  /* fixed-length grid: background lines are hardcoded to SEQ_PX_PER_BEAT(48px)/bar(192px) — keep in sync with the JS constant */
   .seq-track{
     position:relative;
     height:52px;
     border:1px solid var(--fg-faint);
     background-image:
-      repeating-linear-gradient(to right, rgba(57,255,20,.28) 0, rgba(57,255,20,.28) 1px, transparent 1px, transparent 104px),
-      repeating-linear-gradient(to right, rgba(57,255,20,.1) 0, rgba(57,255,20,.1) 1px, transparent 1px, transparent 26px);
+      repeating-linear-gradient(to right, rgba(57,255,20,.28) 0, rgba(57,255,20,.28) 1px, transparent 1px, transparent 192px),
+      repeating-linear-gradient(to right, rgba(57,255,20,.1) 0, rgba(57,255,20,.1) 1px, transparent 1px, transparent 48px);
   }
   .seq-empty{
     position:absolute;inset:0;
@@ -354,8 +354,64 @@
     box-shadow:0 0 8px var(--fg),0 0 2px var(--fg);
     pointer-events:none;
     display:none;
-    left:0;
+    /* absolute positioning is relative to the wrap's padding EDGE, which ignores
+       the wrap's own padding — so left must start at that padding-left value
+       (10px, from .seq-timeline-wrap above) to line up with beat 0 on the
+       ruler/track, which are normal-flow children sitting inside that padding. */
+    left:10px;
   }
+
+  /* Drum grid sits inside the same scrolling .seq-timeline-wrap as the chord
+     track (so it shares the ruler + horizontal scroll position exactly), while
+     its row labels live in a separate, non-scrolling column to its left —
+     avoids threading a label-width offset through every chord-clip coordinate. */
+  .seq-timeline-outer{
+    display:flex;
+    align-items:flex-start;
+  }
+  .seq-drum-labels{
+    flex:0 0 auto;
+    width:64px;
+    display:flex;
+    flex-direction:column;
+  }
+  .seq-drum-label-item{
+    height:24px;
+    margin-top:3px;
+    display:flex;
+    align-items:center;
+    padding:0 6px;
+    font-size:11px;
+    letter-spacing:.05em;
+    color:var(--fg-dim);
+    border:1px solid var(--fg-faint);
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .seq-drum-label-item:first-child{margin-top:0}
+  .seq-drum-grid{
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+  }
+  .seq-drum-row{
+    display:flex;
+    height:24px;
+    margin-top:3px;
+  }
+  .seq-drum-row:first-child{margin-top:0}
+  .seq-drum-step{
+    flex:0 0 auto;
+    height:100%;
+    border:1px solid var(--fg-faint);
+    border-left:none;
+    background:#050505;
+    cursor:pointer;
+  }
+  .seq-drum-step:first-child{border-left:1px solid var(--fg-faint)}
+  .seq-drum-step.beat-start{border-left-color:var(--fg-dim)}
+  .seq-drum-step:hover{border-color:var(--fg-dim)}
+  .seq-drum-step.active{background:var(--fg);box-shadow:0 0 6px var(--fg) inset}
   .seq-clip{
     position:absolute;
     top:4px;
@@ -476,10 +532,14 @@
       <button class="ctl-btn" id="seq-play-btn">[▶ PLAY]</button>
     </div>
 
-    <div class="seq-timeline-wrap" id="seq-timeline-wrap">
-      <div class="seq-ruler" id="seq-ruler"></div>
-      <div class="seq-track" id="seq-track"></div>
-      <div class="seq-playhead" id="seq-playhead"></div>
+    <div class="seq-timeline-outer">
+      <div class="seq-drum-labels" id="seq-drum-labels"></div>
+      <div class="seq-timeline-wrap" id="seq-timeline-wrap">
+        <div class="seq-ruler" id="seq-ruler"></div>
+        <div class="seq-track" id="seq-track"></div>
+        <div class="seq-drum-grid" id="seq-drum-grid"></div>
+        <div class="seq-playhead" id="seq-playhead"></div>
+      </div>
     </div>
 
     <div class="seq-builder">
@@ -944,9 +1004,10 @@
   const QUALITY_INTERVALS = {};
   Object.keys(CHORD_DICT).forEach(k => { QUALITY_INTERVALS[CHORD_DICT[k]] = k.split(',').map(Number); });
 
-  const SEQ_PX_PER_BEAT = 26;
+  const SEQ_PX_PER_BEAT = 48;
   const SEQ_BEATS_PER_BAR = 4;
   const SEQ_MIN_CLIP_BEATS = 1;
+  const SEQ_STEPS_PER_BEAT = 4; // 16th-note drum grid resolution
 
   const seqClips = []; // { id, root, quality, start, length, hits } — start/length in beats, absolute position on a fixed timeline
   let seqNextClipId = 1;
@@ -954,13 +1015,15 @@
   let seqBuilderQuality = '';
   let seqPlaying = false;
   let seqTimeoutIds = [];
-  let seqActiveOscillators = [];
+  let seqActiveNodes = [];
   let seqPlayheadRAF = null;
 
   const seqTimelineWrapEl = document.getElementById('seq-timeline-wrap');
   const seqRulerEl = document.getElementById('seq-ruler');
   const seqPlayheadEl = document.getElementById('seq-playhead');
   const seqTrackEl = document.getElementById('seq-track');
+  const seqDrumLabelsEl = document.getElementById('seq-drum-labels');
+  const seqDrumGridEl = document.getElementById('seq-drum-grid');
   const seqRootGrid = document.getElementById('seq-root-grid');
   const seqQualityGrid = document.getElementById('seq-quality-grid');
   const seqBeatsInput = document.getElementById('seq-beats');
@@ -1018,13 +1081,146 @@
     }
   }
 
+  // ---- Drum kit: basic synthesized voices (no samples), sharing the same
+  // fixed timeline + BPM + play/stop as the chord looper above. Steps are
+  // plain tap-toggles (no drag), so none of the pointer-drag machinery the
+  // chord clips need applies here.
+  let seqNoiseBuffer = null;
+  function seqGetNoiseBuffer(){
+    if(!seqNoiseBuffer){
+      const len = audioCtx.sampleRate; // 1s of white noise, sliced per-hit
+      seqNoiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+      const data = seqNoiseBuffer.getChannelData(0);
+      for(let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    }
+    return seqNoiseBuffer;
+  }
+
+  function seqPlayOscHit(time, { type, freq, freqEnd, freqRampTime, gain, decay }){
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, time);
+    if(freqEnd !== undefined) osc.frequency.exponentialRampToValueAtTime(freqEnd, time + freqRampTime);
+    g.gain.setValueAtTime(gain, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + decay);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(time);
+    osc.stop(time + decay + 0.02);
+    seqActiveNodes.push(osc);
+    osc.onended = () => { seqActiveNodes = seqActiveNodes.filter(n => n !== osc); };
+  }
+
+  function seqPlayNoiseHit(time, { filterType, freq, q, gain, decay }){
+    const src = audioCtx.createBufferSource();
+    src.buffer = seqGetNoiseBuffer();
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.value = freq;
+    if(q !== undefined) filter.Q.value = q;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(gain, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + decay);
+    src.connect(filter).connect(g).connect(audioCtx.destination);
+    src.start(time);
+    src.stop(time + decay + 0.02);
+    seqActiveNodes.push(src);
+    src.onended = () => { seqActiveNodes = seqActiveNodes.filter(n => n !== src); };
+  }
+
+  function seqTriggerKick(time){
+    seqPlayOscHit(time, { type: 'sine', freq: 150, freqEnd: 45, freqRampTime: 0.12, gain: 0.9, decay: 0.28 });
+  }
+  function seqTriggerSnare(time){
+    seqPlayNoiseHit(time, { filterType: 'highpass', freq: 1000, gain: 0.5, decay: 0.15 });
+    seqPlayOscHit(time, { type: 'triangle', freq: 180, gain: 0.5, decay: 0.1 });
+  }
+  function seqTriggerClap(time){
+    [0, 0.012, 0.024].forEach(off =>
+      seqPlayNoiseHit(time + off, { filterType: 'bandpass', freq: 1200, q: 1.2, gain: 0.45, decay: 0.08 })
+    );
+  }
+  function seqTriggerClosedHat(time){
+    seqPlayNoiseHit(time, { filterType: 'highpass', freq: 7000, gain: 0.35, decay: 0.04 });
+  }
+  function seqTriggerOpenHat(time){
+    seqPlayNoiseHit(time, { filterType: 'highpass', freq: 7000, gain: 0.3, decay: 0.24 });
+  }
+
+  const DRUM_VOICES = [
+    { id: 'kick', label: 'KICK', trigger: seqTriggerKick },
+    { id: 'snare', label: 'SNARE', trigger: seqTriggerSnare },
+    { id: 'clap', label: 'CLAP', trigger: seqTriggerClap },
+    { id: 'chat', label: 'C.HAT', trigger: seqTriggerClosedHat },
+    { id: 'ohat', label: 'O.HAT', trigger: seqTriggerOpenHat }
+  ];
+
+  const seqDrumPattern = {}; // voiceId -> Set of active step indices (16th notes)
+  DRUM_VOICES.forEach(v => { seqDrumPattern[v.id] = new Set(); });
+
+  function seqTotalSteps(){
+    return seqTotalBeats() * SEQ_STEPS_PER_BEAT;
+  }
+
+  function seqHasAnyContent(){
+    if(seqClips.length > 0) return true;
+    return DRUM_VOICES.some(v => seqDrumPattern[v.id].size > 0);
+  }
+
+  DRUM_VOICES.forEach(voice => {
+    const item = document.createElement('div');
+    item.className = 'seq-drum-label-item';
+    item.textContent = voice.label;
+    seqDrumLabelsEl.appendChild(item);
+  });
+
+  function renderDrumGrid(){
+    seqDrumGridEl.innerHTML = '';
+    const totalSteps = seqTotalSteps();
+    const stepPx = SEQ_PX_PER_BEAT / SEQ_STEPS_PER_BEAT;
+    DRUM_VOICES.forEach(voice => {
+      const row = document.createElement('div');
+      row.className = 'seq-drum-row';
+      for(let s = 0; s < totalSteps; s++){
+        const cell = document.createElement('div');
+        cell.className = 'seq-drum-step' + (s % SEQ_STEPS_PER_BEAT === 0 ? ' beat-start' : '');
+        if(seqDrumPattern[voice.id].has(s)) cell.classList.add('active');
+        cell.style.width = stepPx + 'px';
+        cell.addEventListener('click', () => {
+          if(seqDrumPattern[voice.id].has(s)){ seqDrumPattern[voice.id].delete(s); cell.classList.remove('active'); }
+          else { seqDrumPattern[voice.id].add(s); cell.classList.add('active'); }
+        });
+        row.appendChild(cell);
+      }
+      seqDrumGridEl.appendChild(row);
+    });
+  }
+  renderDrumGrid();
+
+  // One-time measurement: aligns the frozen label column's first row with the
+  // drum grid's first row inside the scrolling wrap. Ruler/track height is
+  // fixed CSS, but measuring beats hardcoding a number that silently drifts
+  // if that CSS ever changes.
+  function syncDrumLabels(){
+    const firstItem = seqDrumLabelsEl.querySelector('.seq-drum-label-item');
+    if(!firstItem) return;
+    const offset = seqDrumGridEl.getBoundingClientRect().top - seqTimelineWrapEl.getBoundingClientRect().top;
+    firstItem.style.marginTop = offset + 'px';
+  }
+  syncDrumLabels();
+
   seqBarsInput.addEventListener('change', () => {
     const total = seqTotalBeats();
     seqClips.forEach(c => {
       if(c.length > total) c.length = total;
       if(c.start + c.length > total) c.start = Math.max(0, total - c.length);
     });
+    const totalSteps = total * SEQ_STEPS_PER_BEAT;
+    DRUM_VOICES.forEach(v => {
+      [...seqDrumPattern[v.id]].forEach(s => { if(s >= totalSteps) seqDrumPattern[v.id].delete(s); });
+    });
     renderTrack();
+    renderDrumGrid();
     log('TIMELINE LENGTH: ' + Math.round(total / SEQ_BEATS_PER_BAR) + ' BARS', true);
   });
 
@@ -1250,20 +1446,46 @@
     log('TRACK: ADDED ' + NOTE_NAMES[seqBuilderRoot] + seqBuilderQuality + ' @ BEAT ' + start + ' (' + length + 'b x' + hits + ')', true);
   });
 
+  // Real ADSR: attack up, decay down to a sustain plateau, HOLD the sustain
+  // for the note's FULL nominal duration (like a MIDI note staying on until
+  // note-off), and only start the release *after* that point — so the tail
+  // rings out past the note's length instead of eating into it. a/d shrink
+  // for very short/fast hits so they never overrun the note's own duration;
+  // r is a fixed tail that only gets shortened for extremely fast hits so
+  // rapid runs don't wash into an indistinct blur.
+  const SEQ_ADSR = { attack: 0.015, decay: 0.09, sustainLevel: 0.72, release: 0.09 };
+
+  function scheduleADSR(gainParam, startTime, duration, peak){
+    const a = Math.max(0.001, Math.min(SEQ_ADSR.attack, duration * 0.4));
+    const d = Math.max(0.001, Math.min(SEQ_ADSR.decay, Math.max(duration - a, 0.001) * 0.6));
+    const r = Math.min(SEQ_ADSR.release, Math.max(duration * 0.5, 0.03));
+    const attackEnd = startTime + a;
+    const decayEnd = attackEnd + d;
+    const noteOff = startTime + duration;          // sustain holds all the way to here, no early fade
+    const releaseStart = Math.max(decayEnd, noteOff);
+    const noteEnd = releaseStart + r;
+    const sustain = peak * SEQ_ADSR.sustainLevel;
+
+    gainParam.setValueAtTime(0.0001, startTime);
+    gainParam.exponentialRampToValueAtTime(peak, attackEnd);
+    gainParam.exponentialRampToValueAtTime(sustain, decayEnd);
+    gainParam.setValueAtTime(sustain, releaseStart);
+    gainParam.exponentialRampToValueAtTime(0.0001, noteEnd);
+    return noteEnd;
+  }
+
   function seqScheduleTone(freq, startTime, duration, peakGain){
     ensureAudio();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'square';
     osc.frequency.setValueAtTime(freq, startTime);
-    gain.gain.setValueAtTime(0.0001, startTime);
-    gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    const noteEnd = scheduleADSR(gain.gain, startTime, duration, peakGain);
     osc.connect(gain).connect(audioCtx.destination);
     osc.start(startTime);
-    osc.stop(startTime + duration + 0.02);
-    seqActiveOscillators.push(osc);
-    osc.onended = () => { seqActiveOscillators = seqActiveOscillators.filter(o => o !== osc); };
+    osc.stop(noteEnd + 0.02);
+    seqActiveNodes.push(osc);
+    osc.onended = () => { seqActiveNodes = seqActiveNodes.filter(n => n !== osc); };
   }
 
   function highlightSeqClip(clipId, on){
@@ -1271,18 +1493,30 @@
     if(el) el.classList.toggle('active', on);
   }
 
+  const SEQ_LOOKAHEAD = 0.05;       // pre-roll before the very first note of playback
+  const SEQ_SCHEDULE_AHEAD = 0.15; // how far ahead of the next loop's start we re-arm the JS timer
+
+  // audioCtx-clock time the next full loop must start at. Advanced by exact
+  // addition (+totalSec) every cycle instead of being re-derived from
+  // audioCtx.currentTime when the setTimeout callback happens to fire — that
+  // re-derivation is what caused the audible gap/drift at the loop seam,
+  // since setTimeout always fires "at least" that long after, never exactly.
+  let seqNextCycleTime = 0;
+
   // Schedules one full loop of the fixed-length timeline using the Web Audio clock
   // (not setTimeout) for the actual sound, so playback stays sample-accurate
-  // regardless of JS timer jitter. Re-arms itself just before the loop ends.
+  // regardless of JS timer jitter. Re-arms itself well before the loop ends so
+  // there's always slack to absorb timer jitter without missing the seam.
   function seqCycle(){
     if(!seqPlaying) return;
     ensureAudio();
     const bpm = Math.max(20, Math.min(300, parseInt(seqBpmInput.value, 10) || 90));
     const beatSec = 60 / bpm;
-    const lookahead = 0.05;
-    const baseTime = audioCtx.currentTime + lookahead;
     const totalBeats = seqTotalBeats();
     const totalSec = totalBeats * beatSec;
+
+    const baseTime = seqNextCycleTime;
+    const untilBase = Math.max(0, baseTime - audioCtx.currentTime);
 
     seqClips.forEach(clip => {
       const clipStartSec = clip.start * beatSec;
@@ -1294,16 +1528,26 @@
 
       for(let h = 0; h < clip.hits; h++){
         const hitStartSec = clipStartSec + h * hitDurSec;
-        midis.forEach(midi => seqScheduleTone(midiToFreq(midi), baseTime + hitStartSec, hitDurSec * 0.9, 0.055));
+        midis.forEach(midi => seqScheduleTone(midiToFreq(midi), baseTime + hitStartSec, hitDurSec, 0.055));
       }
 
-      const onId = setTimeout(() => highlightSeqClip(clip.id, true), (lookahead + clipStartSec) * 1000);
-      const offId = setTimeout(() => highlightSeqClip(clip.id, false), (lookahead + clipStartSec + clipDurSec) * 1000);
+      const onId = setTimeout(() => highlightSeqClip(clip.id, true), (untilBase + clipStartSec) * 1000);
+      const offId = setTimeout(() => highlightSeqClip(clip.id, false), (untilBase + clipStartSec + clipDurSec) * 1000);
       seqTimeoutIds.push(onId, offId);
     });
 
+    const stepSec = beatSec / SEQ_STEPS_PER_BEAT;
+    DRUM_VOICES.forEach(voice => {
+      seqDrumPattern[voice.id].forEach(stepIndex => {
+        voice.trigger(baseTime + stepIndex * stepSec);
+      });
+    });
+
     startSeqPlayhead(baseTime, totalSec, totalBeats);
-    const loopId = setTimeout(seqCycle, (lookahead + totalSec) * 1000);
+
+    seqNextCycleTime = baseTime + totalSec;
+    const delay = Math.max(0, seqNextCycleTime - audioCtx.currentTime - SEQ_SCHEDULE_AHEAD);
+    const loopId = setTimeout(seqCycle, delay * 1000);
     seqTimeoutIds.push(loopId);
   }
 
@@ -1324,10 +1568,12 @@
   }
 
   function startSequence(){
-    if(seqClips.length === 0){ log('TRACK EMPTY — ADD A CHORD FIRST', true); return; }
+    if(!seqHasAnyContent()){ log('TRACK EMPTY — ADD A CHORD OR DRUM HIT FIRST', true); return; }
+    ensureAudio();
     seqPlaying = true;
     seqPlayBtn.textContent = '[■ STOP]';
     log('SEQ PLAYING @ ' + seqBpmInput.value + ' BPM', true);
+    seqNextCycleTime = audioCtx.currentTime + SEQ_LOOKAHEAD;
     seqCycle();
   }
 
@@ -1336,8 +1582,8 @@
     seqTimeoutIds.forEach(id => clearTimeout(id));
     seqTimeoutIds = [];
     const now = audioCtx ? audioCtx.currentTime : 0;
-    seqActiveOscillators.forEach(osc => { try{ osc.stop(now); }catch(e){} });
-    seqActiveOscillators = [];
+    seqActiveNodes.forEach(node => { try{ node.stop(now); }catch(e){} });
+    seqActiveNodes = [];
     seqTrackEl.querySelectorAll('.seq-clip').forEach(el => el.classList.remove('active'));
     if(seqPlayheadRAF){ cancelAnimationFrame(seqPlayheadRAF); seqPlayheadRAF = null; }
     seqPlayheadEl.style.display = 'none';
