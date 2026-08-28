@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>白癡體重計</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#22403a;
+    --ink-soft:#557b70;
+    --ink-faint:#8aab9f;
+    --glass:rgba(255,255,255,.46);
+    --glass-line:rgba(255,255,255,.75);
+    --mint:#2fc79a;
+    --mint-deep:#1fa480;
+    --blue:#7fb6e8;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;width:100%;min-height:100%;
+    font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
+    background:linear-gradient(180deg,#d9fbe9 0%,#cfe9ff 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+  }
+
+  #background-container{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+  .bubble{
+    position:absolute;bottom:-120px;
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.85),rgba(255,255,255,.1));
+    border-radius:50%;
+    box-shadow:0 0 15px rgba(255,255,255,.5);
+    border:1px solid rgba(255,255,255,.35);
+    animation:floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(1);opacity:0}
+    10%{opacity:.9}
+    100%{transform:translateY(-120vh) scale(1.1);opacity:0}
+  }
+
+  .wrap{
+    position:relative;z-index:10;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:96px 20px 56px;
+  }
+  .card{
+    background:var(--glass);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-line);
+    box-shadow:0 8px 32px rgba(31,90,70,.15);
+    border-radius:26px;
+    padding:38px 34px;
+    width:100%;max-width:560px;
+  }
+  .fade-in{animation:fadeIn .5s cubic-bezier(.22,1,.36,1)}
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(18px) scale(.97)}
+    to{opacity:1;transform:none}
+  }
+
+  .eyebrow{
+    font-size:.82rem;letter-spacing:.18em;
+    color:var(--ink-faint);text-transform:uppercase;
+    margin-bottom:12px;text-align:center;
+  }
+  h1{font-size:1.85rem;line-height:1.35;margin:0 0 16px;text-align:center;letter-spacing:-.01em}
+  .lede{font-size:1.02rem;line-height:1.85;color:var(--ink-soft);text-align:center;margin:0 0 26px}
+  .lede strong{color:var(--ink);font-weight:700}
+
+  .howto{
+    background:rgba(255,255,255,.4);
+    border:1px solid rgba(255,255,255,.6);
+    border-radius:16px;padding:18px 20px;margin-bottom:28px;
+  }
+  .howto-title{font-size:.86rem;font-weight:700;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:12px}
+  .howto-item{display:flex;gap:11px;align-items:flex-start;font-size:.95rem;line-height:1.65;color:var(--ink-soft)}
+  .howto-item+.howto-item{margin-top:11px}
+  .howto-item b{color:var(--ink);font-weight:700}
+  .howto-dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:var(--mint);margin-top:.55em}
+
+  .range-row{display:flex;gap:16px;margin-bottom:6px}
+  .field{flex:1;margin-bottom:18px}
+  .field label{display:block;font-size:.86rem;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.03em}
+  .field input{
+    width:100%;padding:13px 14px;border-radius:12px;
+    border:1.5px solid rgba(255,255,255,.75);
+    background:rgba(255,255,255,.55);
+    font-family:inherit;font-size:1.05rem;color:var(--ink);
+    outline:none;transition:.2s;
+  }
+  .field input:focus{border-color:var(--mint);background:rgba(255,255,255,.85)}
+  .field-error{
+    color:#d6516a;font-size:.86rem;line-height:1.6;margin:-8px 0 18px;
+    display:none;
+  }
+  .field-error.show{display:block}
+
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .btn{
+    flex:1 1 190px;max-width:280px;
+    background:linear-gradient(135deg,var(--mint),var(--blue));color:#08251d;
+    border:1px solid rgba(255,255,255,.5);
+    padding:16px 22px;border-radius:16px;
+    font-family:inherit;font-size:1rem;font-weight:700;
+    cursor:pointer;transition:.2s;
+    box-shadow:0 4px 15px rgba(47,199,154,.32);
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(47,199,154,.45)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:rgba(255,255,255,.5);color:var(--ink);box-shadow:0 4px 15px rgba(31,90,70,.08)}
+  .btn.ghost:hover{background:rgba(255,255,255,.78)}
+
+  /* --- 站上去畫面 --- */
+  .scale-graphic{display:flex;flex-direction:column;align-items:center;margin:6px 0 28px}
+  .scale-feet{font-size:2.2rem;line-height:1;letter-spacing:.5em;margin-bottom:-6px;
+    animation:feetSettle 1.4s cubic-bezier(.22,1,.36,1) both}
+  @keyframes feetSettle{0%{transform:translateY(-18px);opacity:0}100%{transform:translateY(0);opacity:1}}
+  .scale-body{
+    width:100%;max-width:340px;height:96px;border-radius:20px;
+    background:linear-gradient(155deg,#f4fffb,#e2f6ef);
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 10px 26px rgba(31,90,70,.18),inset 0 1px 0 rgba(255,255,255,.9);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .scale-screen{
+    font-family:'Share Tech Mono',monospace;
+    font-size:1.9rem;letter-spacing:.12em;
+    background:#0d211c;color:#3ef0a8;
+    padding:10px 22px;border-radius:8px;
+    box-shadow:inset 0 0 10px rgba(0,0,0,.5);
+    min-width:150px;text-align:center;
+  }
+  .status-log{min-height:150px;margin-bottom:8px}
+  .status-line{
+    font-family:'Share Tech Mono',monospace;font-size:.92rem;line-height:2;
+    color:var(--ink-soft);opacity:0;transform:translateY(6px);
+    animation:lineIn .45s ease forwards;
+  }
+  .status-line::before{content:'> ';color:var(--mint-deep)}
+  @keyframes lineIn{to{opacity:1;transform:none}}
+  .progress-rail{height:5px;border-radius:99px;background:rgba(255,255,255,.55);overflow:hidden;margin:18px 0 4px}
+  .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),var(--blue));
+    width:0%;transition:width .5s linear}
+  .standing-note{text-align:center;font-size:.86rem;color:var(--ink-faint);margin-top:2px}
+
+  /* --- 結果畫面 --- */
+  .result-head{text-align:center;margin-bottom:22px}
+  .verdict-badge{
+    display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;
+    padding:7px 16px;border-radius:99px;background:rgba(255,255,255,.62);margin-bottom:18px;
+  }
+  .lcd-panel{
+    background:#0d211c;border-radius:20px;padding:30px 20px;margin-bottom:22px;
+    box-shadow:inset 0 0 26px rgba(0,0,0,.45);text-align:center;
+  }
+  .lcd-digits{
+    font-family:'Share Tech Mono',monospace;
+    font-size:clamp(46px,12vw,78px);color:#3ef0a8;
+    text-shadow:0 0 14px rgba(62,240,168,.6);letter-spacing:.02em;
+  }
+  .lcd-unit{font-family:'Share Tech Mono',monospace;color:#3ef0a8;opacity:.75;font-size:1.05rem;margin-left:6px}
+  .result-verdict{font-size:1.02rem;line-height:1.8;color:var(--ink-soft);text-align:center;margin:0 0 8px}
+  .result-range{text-align:center;font-size:.86rem;color:var(--ink-faint);margin:0 0 6px}
+
+  .home-btn{
+    position:fixed;top:26px;left:26px;z-index:100;
+    padding:12px 22px;
+    background:rgba(255,255,255,.3);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.5);
+    border-radius:99px;
+    color:#3c5d54;font-weight:700;font-size:.85rem;
+    text-decoration:none;letter-spacing:.05em;
+    transition:.3s;box-shadow:0 4px 15px rgba(0,0,0,.05);
+  }
+  .home-btn:hover{background:rgba(255,255,255,.68);transform:translateX(-3px);color:var(--mint-deep)}
+  .home-btn::after{
+    content:'';position:absolute;inset:-3px;border-radius:99px;pointer-events:none;opacity:0;
+    box-shadow:0 0 0 2px rgba(47,199,154,.5),0 0 20px 4px rgba(47,199,154,.42);
+    animation:home-btn-pulse 10s ease-in-out infinite;
+  }
+  @keyframes home-btn-pulse{
+    0%,88%,100%{opacity:0}
+    91%{opacity:1}
+    94%{opacity:0}
+    97%{opacity:1}
+  }
+
+  @media (max-width:520px){
+    .wrap{padding:82px 14px 44px}
+    .card{padding:28px 22px;border-radius:22px}
+    h1{font-size:1.55rem}
+    .range-row{flex-direction:column;gap:0}
+    .lcd-digits{font-size:clamp(38px,14vw,60px)}
+    .home-btn{top:14px;left:14px;padding:9px 16px;font-size:.78rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+</style>
+</head>
+<body>
+
+<div id="background-container"></div>
+
+<a href="index.html" class="home-btn">← BACK TO TRUEMORE</a>
+
+<div class="wrap">
+  <div id="card" class="card fade-in"></div>
+</div>
+
+<script>
+(function(){
+  // ---- 背景泡泡 ----
+  const bgContainer = document.getElementById('background-container');
+  for(let i = 0; i < 22; i++){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = Math.random() * 70 + 18;
+    b.style.width = b.style.height = size + 'px';
+    b.style.left = (Math.random() * 100) + '%';
+    b.style.animationDuration = (Math.random() * 8 + 6) + 's';
+    b.style.animationDelay = (Math.random() * 5) + 's';
+    bgContainer.appendChild(b);
+  }
+
+  // 站上去畫面裡，一句一句浮現的「診斷紀錄」，純粹是排場
+  const DIAGNOSTIC_LINES = [
+    '偵測到重量，確認是本人沒錯',
+    '校正地心引力中（今天引力比較大）',
+    '扣除呼吸吐氣的重量',
+    '扣除心情不好的 0.3 公斤',
+    '四捨五入到你想看到的範圍',
+    '數字調整中，請保持微笑'
+  ];
+
+  // 出結果時隨機挑一句的場面話
+  const VERDICTS = [
+    '本次測量已通過白癡認證，準確率 0%，誠意 100%。',
+    '這台體重計的演算法只有一條：你想看到的，就是你看到的。',
+    '恭喜，你剛剛創造了一個只存在於這個網頁裡的體重。',
+    '如果有人問起，就說這是「量測誤差內的正常波動」。',
+    '數字很開心地達成了任務，出門不用跟任何人解釋原理。'
+  ];
+
+  const card = document.getElementById('card');
+  let range = { min: 55, max: 58 };
+
+  function swap(build){
+    card.innerHTML = '';
+    card.classList.remove('fade-in');
+    void card.offsetWidth;
+    card.classList.add('fade-in');
+    build();
+  }
+
+  function el(tag, cls, html){
+    const n = document.createElement(tag);
+    if(cls) n.className = cls;
+    if(html !== undefined) n.innerHTML = html;
+    return n;
+  }
+
+  // ---- 開場：輸入想要的體重區間 ----
+  function renderIntro(){
+    swap(() => {
+      card.appendChild(el('div','eyebrow','IDIOT SCALE'));
+      card.appendChild(el('h1','','白癡體重計'));
+      card.appendChild(el('p','lede',
+        '這台體重計不量體重，只量<strong>你希望看到的數字</strong>。<br>' +
+        '先告訴它一個區間，站上去，它就會很有把握地告訴你——你就是那個數字。'
+      ));
+
+      const howto = el('div','howto');
+      howto.appendChild(el('div','howto-title','怎麼用'));
+      [
+        '<b>輸入區間：</b>填一個你今天想看到的體重範圍，數字完全由你決定。',
+        '<b>站上去：</b>螢幕會裝模作樣地「測量」幾秒，製造一點儀式感。',
+        '<b>相信它：</b>結果一定會落在你填的區間裡，這是它唯一的誠實之處。'
+      ].forEach(t => {
+        const row = el('div','howto-item');
+        row.appendChild(el('span','howto-dot'));
+        row.appendChild(el('span','',t));
+        howto.appendChild(row);
+      });
+      card.appendChild(howto);
+
+      const rangeRow = el('div','range-row');
+      const minField = el('div','field');
+      minField.appendChild(el('label','','最輕（公斤）'));
+      const minInput = document.createElement('input');
+      minInput.type = 'number'; minInput.step = '0.1'; minInput.value = range.min;
+      minField.appendChild(minInput);
+      const maxField = el('div','field');
+      maxField.appendChild(el('label','','最重（公斤）'));
+      const maxInput = document.createElement('input');
+      maxInput.type = 'number'; maxInput.step = '0.1'; maxInput.value = range.max;
+      maxField.appendChild(maxInput);
+      rangeRow.appendChild(minField);
+      rangeRow.appendChild(maxField);
+      card.appendChild(rangeRow);
+
+      const error = el('div','field-error','請輸入 1～500 之間的合理數字。');
+      card.appendChild(error);
+
+      const cta = el('div','cta-row');
+      const start = el('button','btn','站上體重計 →');
+      start.onclick = () => {
+        let min = parseFloat(minInput.value);
+        let max = parseFloat(maxInput.value);
+        const valid = Number.isFinite(min) && Number.isFinite(max) &&
+                      min > 0 && max > 0 && min <= 500 && max <= 500;
+        if(!valid){
+          error.classList.add('show');
+          return;
+        }
+        error.classList.remove('show');
+        if(min > max){ const t = min; min = max; max = t; }
+        range = { min, max };
+        renderStanding();
+      };
+      cta.appendChild(start);
+      card.appendChild(cta);
+    });
+  }
+
+  // ---- 站上去：裝模作樣地測量幾秒 ----
+  function renderStanding(){
+    swap(() => {
+      card.appendChild(el('div','eyebrow','MEASURING'));
+      card.appendChild(el('h1','','請站上體重計'));
+      card.appendChild(el('p','lede','保持不動，讓它裝出很專業的樣子。'));
+
+      const graphic = el('div','scale-graphic');
+      graphic.appendChild(el('div','scale-feet','🦶🦶'));
+      const body = el('div','scale-body');
+      const screen = el('div','scale-screen','- - - -');
+      body.appendChild(screen);
+      graphic.appendChild(body);
+      card.appendChild(graphic);
+
+      const log = el('div','status-log');
+      card.appendChild(log);
+
+      const rail = el('div','progress-rail');
+      const fill = el('div','progress-fill');
+      rail.appendChild(fill);
+      card.appendChild(rail);
+      card.appendChild(el('div','standing-note','測量中，請勿晃動…'));
+
+      // 螢幕上的假讀數，測量期間快速亂跳，製造正在感應的感覺
+      const flicker = setInterval(() => {
+        const v = (Math.random() * 60 + 40).toFixed(1);
+        screen.textContent = v;
+      }, 90);
+
+      const stepMs = 650;
+      DIAGNOSTIC_LINES.forEach((text, i) => {
+        setTimeout(() => {
+          const line = el('div','status-line', text);
+          log.appendChild(line);
+          fill.style.width = Math.round(((i + 1) / DIAGNOSTIC_LINES.length) * 100) + '%';
+        }, i * stepMs);
+      });
+
+      setTimeout(() => {
+        clearInterval(flicker);
+        renderResult();
+      }, DIAGNOSTIC_LINES.length * stepMs + 500);
+    });
+  }
+
+  // ---- 結果：數字滾動後停在區間內 ----
+  function renderResult(){
+    const target = range.min + Math.random() * (range.max - range.min);
+    const verdict = VERDICTS[Math.floor(Math.random() * VERDICTS.length)];
+
+    swap(() => {
+      const head = el('div','result-head');
+      head.appendChild(el('div','verdict-badge','準確率 0%　誠意 100%'));
+      card.appendChild(head);
+
+      const panel = el('div','lcd-panel');
+      const digits = el('span','lcd-digits','--.-');
+      panel.appendChild(digits);
+      panel.appendChild(el('span','lcd-unit','kg'));
+      card.appendChild(panel);
+
+      card.appendChild(el('p','result-verdict', verdict));
+      card.appendChild(el('p','result-range',
+        '設定區間：' + range.min.toFixed(1) + ' – ' + range.max.toFixed(1) + ' 公斤'));
+
+      const cta = el('div','cta-row');
+      const again = el('button','btn','再量一次（同區間）');
+      again.onclick = renderStanding;
+      const reset = el('button','btn ghost','重新設定區間');
+      reset.onclick = renderIntro;
+      cta.appendChild(again);
+      cta.appendChild(reset);
+      card.appendChild(cta);
+
+      rollNumber(digits, target, 1800);
+      card.scrollIntoView({ block:'start', behavior:'smooth' });
+    });
+  }
+
+  // 數字先在寬範圍內亂跳，振幅隨時間收斂，最後精準停在 target
+  function rollNumber(displayEl, target, totalMs){
+    const start = performance.now();
+    const initialSpread = 45;
+    function frame(now){
+      const p = Math.min((now - start) / totalMs, 1);
+      if(p < 1){
+        const spread = initialSpread * Math.pow(1 - p, 2);
+        const val = Math.max(0, target + (Math.random() * 2 - 1) * spread);
+        displayEl.textContent = val.toFixed(1);
+        requestAnimationFrame(frame);
+      } else {
+        displayEl.textContent = target.toFixed(1);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  renderIntro();
+})();
+</script>
+</body>
+</html>
