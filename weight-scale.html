@@ -58,9 +58,9 @@
 
   .wrap{
     position:relative;z-index:10;
-    min-height:100vh;
+    min-height:100vh;min-height:100dvh;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:96px 20px 56px;
+    padding:clamp(28px,10vh,96px) 20px clamp(20px,6vh,56px);
   }
   .card{
     background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.78) 55%,rgba(235,224,255,.88));
@@ -209,7 +209,7 @@
   }
 
   .home-btn{
-    position:fixed;top:26px;left:26px;z-index:100;
+    position:fixed;top:clamp(12px,4vh,26px);left:clamp(12px,4vw,26px);z-index:100;
     padding:12px 22px;
     background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.6));
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
@@ -239,6 +239,29 @@
     .card{padding:28px 20px;border-radius:22px}
     h1{font-size:1.5rem}
     .home-btn{top:14px;left:14px;padding:9px 16px;font-size:.78rem}
+  }
+
+  /* 手機橫放時可用高度很短，整組錶面按比例縮小，數字間距不受影響（圓盤半徑沒變） */
+  @media (max-height:520px){
+    .wrap{justify-content:flex-start;padding-top:60px}
+    .card{padding:20px 22px}
+    .eyebrow{margin-bottom:8px}
+    h1{font-size:1.4rem;margin-bottom:14px}
+    .field{margin-bottom:12px}
+    .scale-status{margin-bottom:10px}
+    .scale-case{max-width:260px;padding:15px}
+    .scale-window{height:126px;border-radius:13px}
+    .fixed-needle{top:8px;height:68px}
+    .needle-base{width:69px;height:23px}
+    .capacity-label{bottom:9px;font-size:8px}
+    .dial-wrapper{top:32px}
+    .tick.major{height:15px}
+    .tick.minor{height:8px}
+    .tick-num{top:20px;font-size:14px}
+    .tick-num.triple{top:22px;font-size:11px}
+    .result-box{margin-top:14px}
+    .result-num{font-size:clamp(30px,9vw,40px)}
+    .btn{padding:12px 18px}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.01ms!important;transition-duration:.01ms!important}
