@@ -3,26 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>白癡體重計</title>
+<title>體重計</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chewy&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#22403a;
-    --ink-soft:#557b70;
-    --ink-faint:#8aab9f;
+    --ink:#3a2361;
+    --ink-soft:#6d4fa3;
+    --ink-faint:#a693cf;
     --glass:rgba(255,255,255,.46);
     --glass-line:rgba(255,255,255,.75);
+    --pink:#ff4fd8;
+    --purple:#9b5cff;
+    --blue:#4fc3f7;
+    --cyan:#00e5ff;
     --mint:#2fc79a;
     --mint-deep:#1fa480;
-    --blue:#7fb6e8;
+    --needle:#ff2d55;
   }
   *{box-sizing:border-box}
   html,body{
     margin:0;padding:0;width:100%;min-height:100%;
-    font-family:"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
-    background:linear-gradient(180deg,#d9fbe9 0%,#cfe9ff 100%);
+    font-family:'Chewy',"Microsoft JhengHei","PingFang TC",-apple-system,sans-serif;
+    background:
+      radial-gradient(2px 2px at 10% 22%,#fff 45%,transparent 46%),
+      radial-gradient(2px 2px at 82% 12%,#fff 45%,transparent 46%),
+      radial-gradient(1.5px 1.5px at 52% 48%,#fff 45%,transparent 46%),
+      radial-gradient(2px 2px at 28% 78%,#fff 45%,transparent 46%),
+      radial-gradient(1.5px 1.5px at 92% 62%,#fff 45%,transparent 46%),
+      radial-gradient(2px 2px at 64% 33%,#fff 45%,transparent 46%),
+      radial-gradient(1.5px 1.5px at 14% 64%,#fff 45%,transparent 46%),
+      radial-gradient(2px 2px at 44% 14%,#fff 45%,transparent 46%),
+      linear-gradient(135deg,#ff8fe3 0%,#a06bff 35%,#5fb0ff 70%,#5cf0ff 100%);
+    background-size:180px 180px,180px 180px,180px 180px,180px 180px,180px 180px,180px 180px,180px 180px,180px 180px,cover;
     background-attachment:fixed;
     color:var(--ink);
   }
@@ -49,13 +63,18 @@
     padding:96px 20px 56px;
   }
   .card{
-    background:var(--glass);
-    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-    border:1px solid var(--glass-line);
-    box-shadow:0 8px 32px rgba(31,90,70,.15);
-    border-radius:26px;
-    padding:38px 34px;
-    width:100%;max-width:560px;
+    background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.78) 55%,rgba(235,224,255,.88));
+    border:3px solid #fff;
+    box-shadow:0 0 0 4px var(--pink),0 16px 40px rgba(120,40,200,.35),inset 0 3px 10px rgba(255,255,255,.9);
+    border-radius:32px;
+    padding:40px 32px;
+    width:100%;max-width:460px;
+    position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:'';position:absolute;top:-30%;left:-15%;width:130%;height:55%;
+    background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,0));
+    border-radius:50%;pointer-events:none;
   }
   .fade-in{animation:fadeIn .5s cubic-bezier(.22,1,.36,1)}
   @keyframes fadeIn{
@@ -64,143 +83,166 @@
   }
 
   .eyebrow{
-    font-size:.82rem;letter-spacing:.18em;
-    color:var(--ink-faint);text-transform:uppercase;
-    margin-bottom:12px;text-align:center;
+    position:relative;display:table;margin:0 auto 14px;
+    font-family:'Chewy',cursive;font-size:.78rem;font-weight:800;letter-spacing:.16em;
+    color:#fff;text-transform:uppercase;
+    background:linear-gradient(90deg,var(--pink),var(--purple));
+    padding:6px 18px;border-radius:999px;
+    box-shadow:0 3px 10px rgba(155,92,255,.4);
   }
-  h1{font-size:1.85rem;line-height:1.35;margin:0 0 16px;text-align:center;letter-spacing:-.01em}
-  .lede{font-size:1.02rem;line-height:1.85;color:var(--ink-soft);text-align:center;margin:0 0 26px}
-  .lede strong{color:var(--ink);font-weight:700}
-
-  .howto{
-    background:rgba(255,255,255,.4);
-    border:1px solid rgba(255,255,255,.6);
-    border-radius:16px;padding:18px 20px;margin-bottom:28px;
+  h1{
+    position:relative;
+    font-family:'Chewy',"Microsoft JhengHei","PingFang TC",cursive,sans-serif;
+    font-weight:800;font-size:2rem;line-height:1.3;margin:0 0 26px;text-align:center;letter-spacing:-.01em;
+    background:linear-gradient(90deg,var(--pink),var(--purple) 45%,var(--blue) 78%,var(--cyan));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(255,255,255,.7)) drop-shadow(0 6px 14px rgba(120,40,200,.25));
   }
-  .howto-title{font-size:.86rem;font-weight:700;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:12px}
-  .howto-item{display:flex;gap:11px;align-items:flex-start;font-size:.95rem;line-height:1.65;color:var(--ink-soft)}
-  .howto-item+.howto-item{margin-top:11px}
-  .howto-item b{color:var(--ink);font-weight:700}
-  .howto-dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:var(--mint);margin-top:.55em}
 
-  .range-row{display:flex;gap:16px;margin-bottom:6px}
-  .field{flex:1;margin-bottom:18px}
-  .field label{display:block;font-size:.86rem;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.03em}
+  .field{margin-bottom:20px}
+  .field label{
+    display:block;font-family:'Chewy',cursive;font-weight:700;
+    font-size:.9rem;color:var(--ink-soft);margin-bottom:8px;letter-spacing:.03em;text-align:center;
+  }
   .field input{
-    width:100%;padding:13px 14px;border-radius:12px;
-    border:1.5px solid rgba(255,255,255,.75);
-    background:rgba(255,255,255,.55);
-    font-family:inherit;font-size:1.05rem;color:var(--ink);
-    outline:none;transition:.2s;
+    width:100%;padding:14px 14px;border-radius:999px;
+    border:2px solid var(--purple);
+    background:linear-gradient(180deg,#fff,#f4ecff);
+    font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:var(--ink);
+    outline:none;transition:.2s;text-align:center;
+    box-shadow:inset 0 2px 4px rgba(120,40,200,.12),0 2px 0 rgba(255,255,255,.8);
   }
-  .field input:focus{border-color:var(--mint);background:rgba(255,255,255,.85)}
+  .field input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,79,216,.25),inset 0 2px 4px rgba(120,40,200,.12)}
   .field-error{
-    color:#d6516a;font-size:.86rem;line-height:1.6;margin:-8px 0 18px;
-    display:none;
+    color:#ff2d78;font-size:.86rem;line-height:1.6;margin:-10px 0 18px;
+    text-align:center;display:none;font-weight:700;
   }
   .field-error.show{display:block}
 
   .cta-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
   .btn{
-    flex:1 1 190px;max-width:280px;
-    background:linear-gradient(135deg,var(--mint),var(--blue));color:#08251d;
-    border:1px solid rgba(255,255,255,.5);
-    padding:16px 22px;border-radius:16px;
-    font-family:inherit;font-size:1rem;font-weight:700;
-    cursor:pointer;transition:.2s;
-    box-shadow:0 4px 15px rgba(47,199,154,.32);
+    flex:1 1 170px;max-width:280px;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,#baf0ff 0%,#4fc3f7 45%,#2196d8 55%,#1c86c4 100%);
+    color:#06304a;
+    border:2px solid #fff;
+    padding:16px 22px;border-radius:999px;
+    font-family:'Chewy',cursive;font-size:1rem;font-weight:800;
+    cursor:pointer;transition:.15s;
+    box-shadow:0 4px 0 #1c7fb8,0 8px 18px rgba(30,140,220,.4),inset 0 2px 3px rgba(255,255,255,.9);
   }
-  .btn:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(47,199,154,.45)}
-  .btn:active{transform:translateY(0)}
-  .btn.ghost{background:rgba(255,255,255,.5);color:var(--ink);box-shadow:0 4px 15px rgba(31,90,70,.08)}
-  .btn.ghost:hover{background:rgba(255,255,255,.78)}
+  .btn::before{
+    content:'';position:absolute;top:8%;left:8%;width:84%;height:38%;
+    background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,0));
+    border-radius:50%;pointer-events:none;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 #1c7fb8,0 12px 22px rgba(30,140,220,.5),inset 0 2px 3px rgba(255,255,255,.9)}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1c7fb8,inset 0 2px 3px rgba(255,255,255,.9)}
+  .btn.ghost{
+    background:linear-gradient(180deg,#ffd6f7 0%,#ff8fe3 45%,#ff5fc4 55%,#e83fae 100%);
+    color:#5a0e46;
+    box-shadow:0 4px 0 #c22f92,0 8px 18px rgba(255,95,196,.35),inset 0 2px 3px rgba(255,255,255,.85);
+  }
+  .btn.ghost:hover{box-shadow:0 6px 0 #c22f92,0 12px 22px rgba(255,95,196,.45),inset 0 2px 3px rgba(255,255,255,.85)}
+  .btn.ghost:active{box-shadow:0 2px 0 #c22f92,inset 0 2px 3px rgba(255,255,255,.85)}
 
-  /* --- 站上去畫面 --- */
-  .scale-graphic{display:flex;flex-direction:column;align-items:center;margin:6px 0 28px}
-  .scale-feet{font-size:2.2rem;line-height:1;letter-spacing:.5em;margin-bottom:-6px;
-    animation:feetSettle 1.4s cubic-bezier(.22,1,.36,1) both}
-  @keyframes feetSettle{0%{transform:translateY(-18px);opacity:0}100%{transform:translateY(0);opacity:1}}
-  .scale-body{
-    width:100%;max-width:340px;height:96px;border-radius:20px;
-    background:linear-gradient(155deg,#f4fffb,#e2f6ef);
-    border:1px solid rgba(255,255,255,.9);
-    box-shadow:0 10px 26px rgba(31,90,70,.18),inset 0 1px 0 rgba(255,255,255,.9);
-    display:flex;align-items:center;justify-content:center;
+  /* --- 轉盤體重計：指針固定，錶面（刻度盤）在窗口後面轉動 --- */
+  .scale-status{text-align:center;font-size:.92rem;color:var(--ink-soft);margin:0 0 18px;min-height:1.4em}
+  .scale-case{
+    width:100%;max-width:300px;margin:0 auto;padding:20px;border-radius:28px;
+    background:linear-gradient(135deg,#eef0ff,#dfe6ff 40%,#ffe3fb 70%,#e0faff 100%);
+    box-shadow:0 14px 30px rgba(120,40,200,.28),0 0 0 4px #fff,0 0 0 7px var(--purple),
+      inset 0 4px 8px rgba(255,255,255,.9);
   }
-  .scale-screen{
-    font-family:'Share Tech Mono',monospace;
-    font-size:1.9rem;letter-spacing:.12em;
-    background:#0d211c;color:#3ef0a8;
-    padding:10px 22px;border-radius:8px;
-    box-shadow:inset 0 0 10px rgba(0,0,0,.5);
-    min-width:150px;text-align:center;
+  .scale-window{
+    position:relative;height:168px;border-radius:16px;overflow:hidden;
+    background:#fdfdfd;border:3px solid #d7dadc;
+    box-shadow:inset 0 8px 16px rgba(0,0,0,.12);
   }
-  .status-log{min-height:150px;margin-bottom:8px}
-  .status-line{
-    font-family:'Share Tech Mono',monospace;font-size:.92rem;line-height:2;
-    color:var(--ink-soft);opacity:0;transform:translateY(6px);
-    animation:lineIn .45s ease forwards;
+  .scale-window::after{
+    content:'';position:absolute;inset:0;z-index:13;pointer-events:none;
+    background:linear-gradient(120deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 38%);
   }
-  .status-line::before{content:'> ';color:var(--mint-deep)}
-  @keyframes lineIn{to{opacity:1;transform:none}}
-  .progress-rail{height:5px;border-radius:99px;background:rgba(255,255,255,.55);overflow:hidden;margin:18px 0 4px}
-  .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),var(--blue));
-    width:0%;transition:width .5s linear}
-  .standing-note{text-align:center;font-size:.86rem;color:var(--ink-faint);margin-top:2px}
+  .fixed-needle{
+    position:absolute;left:50%;top:10px;width:3px;height:90px;
+    background:var(--needle);transform:translateX(-50%);
+    box-shadow:1px 1px 3px rgba(0,0,0,.25);z-index:10;
+  }
+  .needle-base{
+    position:absolute;left:50%;bottom:0;width:92px;height:30px;
+    background:#e9ebec;border-radius:60px 60px 0 0;
+    transform:translateX(-50%);box-shadow:0 -3px 6px rgba(0,0,0,.08);z-index:11;
+  }
+  .capacity-label{
+    position:absolute;bottom:12px;left:0;right:0;text-align:center;
+    font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.06em;
+    color:#8a7aa8;z-index:12;
+  }
+  .dial-wrapper{position:absolute;left:50%;top:42px}
+  .dial{
+    position:absolute;width:420px;height:420px;left:-210px;top:0;border-radius:50%;
+    transition:transform 2s cubic-bezier(.22,1,.36,1);
+  }
+  .tick{position:absolute;left:50%;top:0;transform:translateX(-50%);background:#3c454a}
+  .tick.major{width:3px;height:20px}
+  .tick.minor{width:1.5px;height:10px;opacity:.55}
+  .tick-num{
+    position:absolute;left:50%;top:27px;transform:translateX(-50%);
+    font-family:'Orbitron',sans-serif;font-weight:700;color:#2c3438;
+    font-size:19px;white-space:nowrap;
+  }
+  /* 三位數比兩位數寬很多，縮小字級並收一點字距，才不會跟隔壁刻度擠在一起 */
+  .tick-num.triple{font-size:14px;top:29px;letter-spacing:-.02em}
 
-  /* --- 結果畫面 --- */
-  .result-head{text-align:center;margin-bottom:22px}
-  .verdict-badge{
-    display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;
-    padding:7px 16px;border-radius:99px;background:rgba(255,255,255,.62);margin-bottom:18px;
+  .result-box{text-align:center;margin-top:22px}
+  .result-num{
+    font-family:'Orbitron',sans-serif;font-weight:700;
+    font-size:clamp(38px,10vw,52px);
+    background:linear-gradient(90deg,var(--purple),var(--pink) 50%,var(--blue));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(255,255,255,.7));
+    opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease;
   }
-  .lcd-panel{
-    background:#0d211c;border-radius:20px;padding:30px 20px;margin-bottom:22px;
-    box-shadow:inset 0 0 26px rgba(0,0,0,.45);text-align:center;
+  .result-num.show{opacity:1;transform:none}
+  .result-num .unit{
+    font-size:.42em;font-weight:400;margin-left:4px;
+    -webkit-text-fill-color:var(--ink-soft);color:var(--ink-soft);
   }
-  .lcd-digits{
-    font-family:'Share Tech Mono',monospace;
-    font-size:clamp(46px,12vw,78px);color:#3ef0a8;
-    text-shadow:0 0 14px rgba(62,240,168,.6);letter-spacing:.02em;
-  }
-  .lcd-unit{font-family:'Share Tech Mono',monospace;color:#3ef0a8;opacity:.75;font-size:1.05rem;margin-left:6px}
-  .result-verdict{font-size:1.02rem;line-height:1.8;color:var(--ink-soft);text-align:center;margin:0 0 8px}
-  .result-range{text-align:center;font-size:.86rem;color:var(--ink-faint);margin:0 0 6px}
 
   .home-btn{
     position:fixed;top:26px;left:26px;z-index:100;
     padding:12px 22px;
-    background:rgba(255,255,255,.3);
+    background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.6));
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,.5);
+    border:2px solid #fff;
     border-radius:99px;
-    color:#3c5d54;font-weight:700;font-size:.85rem;
+    color:#6b2fa8;font-family:'Chewy',cursive;font-weight:700;font-size:.85rem;
     text-decoration:none;letter-spacing:.05em;
-    transition:.3s;box-shadow:0 4px 15px rgba(0,0,0,.05);
+    transition:background .3s,color .3s,transform .3s;
+    animation:home-btn-flash 3s ease-in-out infinite;
   }
-  .home-btn:hover{background:rgba(255,255,255,.68);transform:translateX(-3px);color:var(--mint-deep)}
-  .home-btn::after{
-    content:'';position:absolute;inset:-3px;border-radius:99px;pointer-events:none;opacity:0;
-    box-shadow:0 0 0 2px rgba(47,199,154,.5),0 0 20px 4px rgba(47,199,154,.42);
-    animation:home-btn-pulse 10s ease-in-out infinite;
+  .home-btn:hover{background:linear-gradient(180deg,#fff,#ffe3fb);transform:translateX(-3px);color:var(--pink)}
+  @keyframes home-btn-flash{
+    0%,80%,100%{box-shadow:0 0 0 2px var(--purple),0 4px 14px rgba(120,40,200,.25)}
+    86%,90%{box-shadow:0 0 0 5px #fff,0 0 0 9px var(--pink),0 0 36px 14px rgba(255,79,216,.95)}
+    93%{box-shadow:0 0 0 2px var(--purple),0 4px 14px rgba(120,40,200,.25)}
+    96%,99%{box-shadow:0 0 0 5px #fff,0 0 0 9px var(--pink),0 0 36px 14px rgba(255,79,216,.95)}
   }
-  @keyframes home-btn-pulse{
-    0%,88%,100%{opacity:0}
-    91%{opacity:1}
-    94%{opacity:0}
-    97%{opacity:1}
+
+  .sparkle{position:fixed;pointer-events:none;z-index:9999;animation:sparkle-fade .7s ease-out forwards}
+  @keyframes sparkle-fade{
+    0%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)}
+    100%{opacity:0;transform:translate(-50%,-80%) scale(.4) rotate(45deg)}
   }
 
   @media (max-width:520px){
     .wrap{padding:82px 14px 44px}
-    .card{padding:28px 22px;border-radius:22px}
-    h1{font-size:1.55rem}
-    .range-row{flex-direction:column;gap:0}
-    .lcd-digits{font-size:clamp(38px,14vw,60px)}
+    .card{padding:28px 20px;border-radius:22px}
+    h1{font-size:1.5rem}
     .home-btn{top:14px;left:14px;padding:9px 16px;font-size:.78rem}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+    .dial{transition:none}
   }
 </style>
 </head>
@@ -229,27 +271,10 @@
     bgContainer.appendChild(b);
   }
 
-  // 站上去畫面裡，一句一句浮現的「診斷紀錄」，純粹是排場
-  const DIAGNOSTIC_LINES = [
-    '偵測到重量，確認是本人沒錯',
-    '校正地心引力中（今天引力比較大）',
-    '扣除呼吸吐氣的重量',
-    '扣除心情不好的 0.3 公斤',
-    '四捨五入到你想看到的範圍',
-    '數字調整中，請保持微笑'
-  ];
-
-  // 出結果時隨機挑一句的場面話
-  const VERDICTS = [
-    '本次測量已通過白癡認證，準確率 0%，誠意 100%。',
-    '這台體重計的演算法只有一條：你想看到的，就是你看到的。',
-    '恭喜，你剛剛創造了一個只存在於這個網頁裡的體重。',
-    '如果有人問起，就說這是「量測誤差內的正常波動」。',
-    '數字很開心地達成了任務，出門不用跟任何人解釋原理。'
-  ];
+  const MAX_CAPACITY = 130; // 轉盤的滿刻度（公斤）
 
   const card = document.getElementById('card');
-  let range = { min: 55, max: 58 };
+  let desired = 60;
 
   function swap(build){
     card.innerHTML = '';
@@ -266,168 +291,142 @@
     return n;
   }
 
-  // ---- 開場：輸入想要的體重區間 ----
+  // ---- 開場：輸入你想要的體重 ----
   function renderIntro(){
     swap(() => {
-      card.appendChild(el('div','eyebrow','IDIOT SCALE'));
-      card.appendChild(el('h1','','白癡體重計'));
-      card.appendChild(el('p','lede',
-        '這台體重計不量體重，只量<strong>你希望看到的數字</strong>。<br>' +
-        '先告訴它一個區間，站上去，它就會很有把握地告訴你——你就是那個數字。'
-      ));
+      card.appendChild(el('div','eyebrow','✨ SCALE ✨'));
+      card.appendChild(el('h1','','體重計'));
 
-      const howto = el('div','howto');
-      howto.appendChild(el('div','howto-title','怎麼用'));
-      [
-        '<b>輸入區間：</b>填一個你今天想看到的體重範圍，數字完全由你決定。',
-        '<b>站上去：</b>螢幕會裝模作樣地「測量」幾秒，製造一點儀式感。',
-        '<b>相信它：</b>結果一定會落在你填的區間裡，這是它唯一的誠實之處。'
-      ].forEach(t => {
-        const row = el('div','howto-item');
-        row.appendChild(el('span','howto-dot'));
-        row.appendChild(el('span','',t));
-        howto.appendChild(row);
-      });
-      card.appendChild(howto);
+      const field = el('div','field');
+      field.appendChild(el('label','','你的體重'));
+      const input = document.createElement('input');
+      input.type = 'number'; input.step = '0.1'; input.value = desired;
+      field.appendChild(input);
+      card.appendChild(field);
 
-      const rangeRow = el('div','range-row');
-      const minField = el('div','field');
-      minField.appendChild(el('label','','最輕（公斤）'));
-      const minInput = document.createElement('input');
-      minInput.type = 'number'; minInput.step = '0.1'; minInput.value = range.min;
-      minField.appendChild(minInput);
-      const maxField = el('div','field');
-      maxField.appendChild(el('label','','最重（公斤）'));
-      const maxInput = document.createElement('input');
-      maxInput.type = 'number'; maxInput.step = '0.1'; maxInput.value = range.max;
-      maxField.appendChild(maxInput);
-      rangeRow.appendChild(minField);
-      rangeRow.appendChild(maxField);
-      card.appendChild(rangeRow);
-
-      const error = el('div','field-error','請輸入 1～500 之間的合理數字。');
+      const error = el('div','field-error','請輸入大於 0 的數字。');
       card.appendChild(error);
 
       const cta = el('div','cta-row');
-      const start = el('button','btn','站上體重計 →');
+      const start = el('button','btn','站上去 →');
       start.onclick = () => {
-        let min = parseFloat(minInput.value);
-        let max = parseFloat(maxInput.value);
-        const valid = Number.isFinite(min) && Number.isFinite(max) &&
-                      min > 0 && max > 0 && min <= 500 && max <= 500;
-        if(!valid){
+        const v = parseFloat(input.value);
+        if(!Number.isFinite(v) || v <= 0){
           error.classList.add('show');
           return;
         }
         error.classList.remove('show');
-        if(min > max){ const t = min; min = max; max = t; }
-        range = { min, max };
-        renderStanding();
+        desired = v;
+        renderResult();
       };
       cta.appendChild(start);
       card.appendChild(cta);
     });
   }
 
-  // ---- 站上去：裝模作樣地測量幾秒 ----
-  function renderStanding(){
-    swap(() => {
-      card.appendChild(el('div','eyebrow','MEASURING'));
-      card.appendChild(el('h1','','請站上體重計'));
-      card.appendChild(el('p','lede','保持不動，讓它裝出很專業的樣子。'));
+  // 產生會轉動的大轉盤：每一格刻度包在自己的角度容器裡，數字直接跟著容器轉，
+  // 靠外層 .dial 反向轉動，讓目標刻度轉到正上方時，數字剛好轉回正的
+  function buildDial(){
+    const dial = el('div','dial');
+    const degPerKg = 360 / MAX_CAPACITY;
 
-      const graphic = el('div','scale-graphic');
-      graphic.appendChild(el('div','scale-feet','🦶🦶'));
-      const body = el('div','scale-body');
-      const screen = el('div','scale-screen','- - - -');
-      body.appendChild(screen);
-      graphic.appendChild(body);
-      card.appendChild(graphic);
+    for(let i = 0; i < MAX_CAPACITY; i++){
+      const wrap = document.createElement('div');
+      wrap.style.position = 'absolute';
+      wrap.style.inset = '0';
+      wrap.style.transform = 'rotate(' + (i * degPerKg) + 'deg)';
 
-      const log = el('div','status-log');
-      card.appendChild(log);
+      const isMajor = i % 5 === 0;
+      wrap.appendChild(el('div','tick ' + (isMajor ? 'major' : 'minor')));
 
-      const rail = el('div','progress-rail');
-      const fill = el('div','progress-fill');
-      rail.appendChild(fill);
-      card.appendChild(rail);
-      card.appendChild(el('div','standing-note','測量中，請勿晃動…'));
-
-      // 螢幕上的假讀數，測量期間快速亂跳，製造正在感應的感覺
-      const flicker = setInterval(() => {
-        const v = (Math.random() * 60 + 40).toFixed(1);
-        screen.textContent = v;
-      }, 90);
-
-      const stepMs = 650;
-      DIAGNOSTIC_LINES.forEach((text, i) => {
-        setTimeout(() => {
-          const line = el('div','status-line', text);
-          log.appendChild(line);
-          fill.style.width = Math.round(((i + 1) / DIAGNOSTIC_LINES.length) * 100) + '%';
-        }, i * stepMs);
-      });
-
-      setTimeout(() => {
-        clearInterval(flicker);
-        renderResult();
-      }, DIAGNOSTIC_LINES.length * stepMs + 500);
-    });
+      if(isMajor){
+        wrap.appendChild(el('div','tick-num' + (i >= 100 ? ' triple' : ''), i));
+      }
+      dial.appendChild(wrap);
+    }
+    return dial;
   }
 
-  // ---- 結果：數字滾動後停在區間內 ----
+  // ---- 結果：指針掃到目標值後停住 ----
   function renderResult(){
-    const target = range.min + Math.random() * (range.max - range.min);
-    const verdict = VERDICTS[Math.floor(Math.random() * VERDICTS.length)];
+    const overCap = desired > MAX_CAPACITY;
+    // 在想要的體重上加一點點誤差，看起來才像真的量出來的；超過上限指針就卡死在 0
+    const dialTarget = overCap
+      ? 0
+      : Math.min(MAX_CAPACITY, Math.max(0, desired + (Math.random() * 0.8 - 0.4)));
 
     swap(() => {
-      const head = el('div','result-head');
-      head.appendChild(el('div','verdict-badge','準確率 0%　誠意 100%'));
-      card.appendChild(head);
+      const status = el('div','scale-status','測量中…');
+      card.appendChild(status);
 
-      const panel = el('div','lcd-panel');
-      const digits = el('span','lcd-digits','--.-');
-      panel.appendChild(digits);
-      panel.appendChild(el('span','lcd-unit','kg'));
-      card.appendChild(panel);
+      const shell = el('div','scale-case');
+      const win = el('div','scale-window');
+      win.appendChild(el('div','fixed-needle'));
+      win.appendChild(el('div','needle-base'));
+      win.appendChild(el('div','capacity-label', MAX_CAPACITY + 'kg x 1kg'));
 
-      card.appendChild(el('p','result-verdict', verdict));
-      card.appendChild(el('p','result-range',
-        '設定區間：' + range.min.toFixed(1) + ' – ' + range.max.toFixed(1) + ' 公斤'));
+      const dialWrapper = el('div','dial-wrapper');
+      const dial = buildDial();
+      dialWrapper.appendChild(dial);
+      win.appendChild(dialWrapper);
+
+      shell.appendChild(win);
+      card.appendChild(shell);
+
+      const resultBox = el('div','result-box');
+      const num = el('div','result-num', '-- <span class="unit">kg</span>');
+      resultBox.appendChild(num);
+      card.appendChild(resultBox);
 
       const cta = el('div','cta-row');
-      const again = el('button','btn','再量一次（同區間）');
-      again.onclick = renderStanding;
-      const reset = el('button','btn ghost','重新設定區間');
+      const again = el('button','btn','再站一次');
+      again.onclick = renderResult;
+      const reset = el('button','btn ghost','換個體重');
       reset.onclick = renderIntro;
       cta.appendChild(again);
       cta.appendChild(reset);
       card.appendChild(cta);
 
-      rollNumber(digits, target, 1800);
+      // 指針固定，轉盤反向轉動，讓目標數字轉到指針指的正上方
+      const angle = -(dialTarget / MAX_CAPACITY) * 360;
+      requestAnimationFrame(() => {
+        dial.style.transform = 'rotate(' + angle + 'deg)';
+      });
+
+      setTimeout(() => {
+        status.textContent = '';
+        const shown = overCap ? desired : dialTarget;
+        num.innerHTML = shown.toFixed(1) + ' <span class="unit">kg</span>';
+        num.classList.add('show');
+      }, 2100);
+
       card.scrollIntoView({ block:'start', behavior:'smooth' });
     });
   }
 
-  // 數字先在寬範圍內亂跳，振幅隨時間收斂，最後精準停在 target
-  function rollNumber(displayEl, target, totalMs){
-    const start = performance.now();
-    const initialSpread = 45;
-    function frame(now){
-      const p = Math.min((now - start) / totalMs, 1);
-      if(p < 1){
-        const spread = initialSpread * Math.pow(1 - p, 2);
-        const val = Math.max(0, target + (Math.random() * 2 - 1) * spread);
-        displayEl.textContent = val.toFixed(1);
-        requestAnimationFrame(frame);
-      } else {
-        displayEl.textContent = target.toFixed(1);
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-
   renderIntro();
+
+  // ---- Y2K 滑鼠亮片尾巴 ----
+  (function initSparkleTrail(){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(matchMedia('(pointer: coarse)').matches) return; // 觸控裝置沒有游標可以拖亮片
+    const colors = ['#ff4fd8','#9b5cff','#4fc3f7','#c6ff4d','#ffe14f'];
+    let last = 0;
+    document.addEventListener('mousemove', (e) => {
+      const now = Date.now();
+      if(now - last < 40) return; // 節流，避免亮片洗版
+      last = now;
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = '✦';
+      s.style.left = e.clientX + 'px';
+      s.style.top = e.clientY + 'px';
+      s.style.fontSize = (10 + Math.random() * 10) + 'px';
+      s.style.color = colors[Math.floor(Math.random() * colors.length)];
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 700);
+    }, { passive: true });
+  })();
 })();
 </script>
 </body>
